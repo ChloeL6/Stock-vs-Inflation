@@ -12,12 +12,16 @@ data_dir = './dsa-airflow/data'
 
 file_names = ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA']
 
-dataframes = {}
+columns = ['stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume']
+
+df = spark.createDataFrame(data=[], schema=columns)
 
 for csv in file_names:
-    df = sparkql.read.csv(os.path.join(data_dir,csv+'.csv'), header=True)
-    df = df.withColumn('stock_name', sf.lit(csv))
-    df.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'stock_name')
-    df.select('stock_name', 'Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume')
+    idf = sparkql.read.csv(os.path.join(data_dir,csv+'.csv'), header=True)
+    idf = df.withColumn('stock_name', sf.lit(csv))
+    idf.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'stock_name')
+    #df.select('stock_name', 'Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume')
+    idf.select('stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume')
+    df.union(idf)
 
-print(dataframes)
+df.show()
