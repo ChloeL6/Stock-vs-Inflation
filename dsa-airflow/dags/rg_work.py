@@ -6,8 +6,25 @@ import pyspark.sql.types as st          # st = spark types
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
+import yaml
+from airflow.models import Variable
+from airflow.hooks.filesystem import FSHook
 
 
+#SETUP config and data dir path
+#------------------------------------------------
+_default_config_path = './config.yml'
+CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
+config: dict = {}
+with open(CONF_PATH) as open_yaml:
+    config: dict =  yaml.full_load(open_yaml)
+    
+data_fs = FSHook(conn_id='data_fs')     # get airflow connection for data_fs
+DATA_DIR = data_fs.get_path()  
+
+
+#Initialize spark for ETL to parquet file
+#------------------------------------------------
 sparkql = pyspark.sql.SparkSession.builder.master('local').getOrCreate()
 
 import os
@@ -42,14 +59,13 @@ for csv in file_names:
 # Write to parquet file. Used coalesce in order to have one parquet file
 df.coalesce(1).write.format("parquet").save(os.path.join(data_dir,'all_tech_stocks.parquet'))
 
+#load stocks parquet file into BigQuery
+#------------------------------------------------
 
+PROJECT_NAME = config['project']
+DATASET_NAME = config['dataset']
 
-
-
-PROJECT_NAME = 'team-week-3'
-DATASET_NAME = 'tech_stocks_world_events'
-
-key_path = "/Users/Ruben/Desktop/google_cred/.cred/team_project_3/team-week-3-2f1d10dceea4.json"
+key_path = config['key_path']
 
 credentials = service_account.Credentials.from_service_account_file(
     key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"],
