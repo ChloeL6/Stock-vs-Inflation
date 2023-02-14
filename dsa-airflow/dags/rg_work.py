@@ -1,15 +1,14 @@
-import pyspark
+from airflow.models import Variable
+from airflow.hooks.filesystem import FSHook
 import pandas as pd
-from pyspark.sql import SparkSession
-import pyspark.sql.functions as sf      # sf = spark functions
-import pyspark.sql.types as st          # st = spark types
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
 import yaml
-from airflow.models import Variable
-from airflow.hooks.filesystem import FSHook
-
+import pyspark
+from pyspark.sql import SparkSession
+import pyspark.sql.functions as sf      # sf = spark functions
+import pyspark.sql.types as st          # st = spark types
 
 #SETUP config and data dir path
 #------------------------------------------------
