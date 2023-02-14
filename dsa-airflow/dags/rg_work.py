@@ -5,6 +5,9 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
 import yaml
+import findspark
+findspark.init()
+
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as sf      # sf = spark functions
