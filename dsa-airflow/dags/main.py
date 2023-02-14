@@ -19,7 +19,7 @@ table_names = ['stocks']
 # -----------------------------------------
 
 with DAG(
-    dag_id='dsa_tech_stocks',
+    dag_id='dsa_tables_load',
     schedule_interval='@once',
     start_date=datetime.utcnow(),
     catchup=False,
@@ -63,5 +63,7 @@ with DAG(
     stocks_table_task = PythonOperator(
         task_id=f"create_stocks_table",
         python_callable=create_stocks_table,               # call the dsa_utils.table_definitions.create_table
-        doc_md=create_table.__doc__                 # take function docstring
+        doc_md=create_stocks_table.__doc__                 # take function docstring
     )
+
+    check_0 >> t0 >> stocks_table_task
