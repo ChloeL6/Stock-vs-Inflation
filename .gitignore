@@ -3,3 +3,4 @@ venv/
 logs/
 plugins/
 docker-compose.yaml
+.env
