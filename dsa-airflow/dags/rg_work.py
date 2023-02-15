@@ -83,9 +83,10 @@ data_dir = '../data/all_tech_stocks.parquet'
 
 #rename the parquet file in order to load to BigQuery
 parq = '.snappy.parquet'
+crc = '.crc'
 for file_name in os.listdir(data_dir):
     source = data_dir + file_name
-    if parq in source and '.crc' not in source:
+    if parq in source and crc not in source:
         os.rename(os.path.join(data_dir,file_name),os.path.join(data_dir,'stocks.parquet'))
     
 #filepath to get loaded to BigQuery
