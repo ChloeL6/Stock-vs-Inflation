@@ -15,7 +15,7 @@ import os
 #SETUP config and FileSensor data dir path
 #------------------------------------------------
 config = {'project': 'team-week-3', 'dataset': 'tech_stocks_world_events',
-'key_path': "/Users/Ruben/Desktop/google_cred/.cred/team_project_3/team-week-3-2f1d10dceea4.json"}
+'key_path': "/opt/airflow/creds/team-week-3-2508efd8ce08.json"}
 
 #_default_config_path = './config.yml'
 #CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
@@ -68,7 +68,7 @@ credentials = service_account.Credentials.from_service_account_file(
 )
 
 #create bigquery client
-client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+client = bigquery.Client()#credentials=credentials, project=credentials.project_id)
 
 #create dataset_id and table_ids
 dataset_id = f"{PROJECT_NAME}.{DATASET_NAME}"
