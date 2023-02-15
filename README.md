@@ -1,8 +1,8 @@
-# Emissions-by-Country
+# Tech Stocks
 
 #### By [Ruben Giosa](https://github.com/rgiosa10), [Chloe (Yen Chi) Le](https://github.com/ChloeL6), [Philip Kendal](https://github.com/philiprobertovich)
 
-#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, BigQuery and Looker Studio.
+#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Spark, Astro CLI, BigQuery and Looker Studio.
 
 <br>
 
@@ -11,6 +11,7 @@
 * Python
 * Jupyter
 * Airflow
+* Astro CLI
 * Spark
 * BigQuery
 * Looker Studio
@@ -26,7 +27,7 @@
 
 ## Datasets Used
 
-1. 
+1. [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices)
 
 </br>
 
@@ -56,7 +57,7 @@
 
 <br>
 
-[Chloe](https://github.com/ChloeL6) worked on profiling, cleaning and transformations for the [Emissions by Country](https://www.kaggle.com/datasets/thedevastator/global-fossil-co2-emissions-by-country-2002-2022) data set create the `fct_emissions` table. Upon completion it was loaded to BigQuery.
+[Chloe](https://github.com/ChloeL6) worked on profiling, cleaning and transformations for the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices) data set create the `fct_emissions` table. Upon completion it was loaded to BigQuery.
 
 <br>
 
