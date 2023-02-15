@@ -5,12 +5,6 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.sensors.filesystem import FileSensor
 from airflow.hooks.filesystem import FSHook
-import findspark
-findspark.init()
-import pyspark
-from pyspark.sql import SparkSession
-import pyspark.sql.functions as sf      # sf = spark functions
-import pyspark.sql.types as st          # st = spark types
 
 
 # local imports

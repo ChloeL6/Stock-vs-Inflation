@@ -5,8 +5,7 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
 import yaml
-import findspark
-findspark.init()
+import os
 
 import pyspark
 from pyspark.sql import SparkSession
@@ -29,7 +28,7 @@ DATA_DIR = data_fs.get_path()
 #------------------------------------------------
 sparkql = pyspark.sql.SparkSession.builder.master('local').getOrCreate()
 
-import os
+
 data_dir = '../data'
 
 file_names = ['ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
@@ -84,6 +83,7 @@ data_dir = '../data'
 DATA_FILE = os.path.join(data_dir,'all_tech_stocks.parquet/part-00000-aa854ce3-ba60-4fb4-abe7-f7df420718dc-c000.snappy.parquet')
 
 TABLE_SCHEMA = [
+    bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('stock_name', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('date', 'DATE', mode='NULLABLE'),
     bigquery.SchemaField('open', 'FLOAT', mode='NULLABLE'),
