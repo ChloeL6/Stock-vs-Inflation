@@ -7,18 +7,21 @@ from google.cloud.exceptions import NotFound
 import yaml
 import os
 
-import pyspark
-from pyspark.sql import SparkSession
-import pyspark.sql.functions as sf      # sf = spark functions
-import pyspark.sql.types as st          # st = spark types
+#import pyspark
+#from pyspark.sql import SparkSession
+#import pyspark.sql.functions as sf      # sf = spark functions
+#import pyspark.sql.types as st          # st = spark types
 
 #SETUP config and FileSensor data dir path
 #------------------------------------------------
-_default_config_path = '/usr/local/airflow/dags/config.yml'
-CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
-config: dict = {}
-with open(CONF_PATH) as open_yaml:
-    config: dict =  yaml.full_load(open_yaml)
+config = {'project': 'team-week-3', 'dataset': 'tech_stocks_world_events',
+'key_path': "/Users/Ruben/Desktop/google_cred/.cred/team_project_3/team-week-3-2f1d10dceea4.json"}
+
+#_default_config_path = './config.yml'
+#CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
+#config: dict = {}
+#with open(CONF_PATH) as open_yaml:
+    #config: dict =  yaml.full_load(open_yaml)
     
 data_fs = FSHook(conn_id='data_fs')     # get airflow connection for data_fs
 DATA_DIR = data_fs.get_path()  
@@ -26,39 +29,31 @@ DATA_DIR = data_fs.get_path()
 
 #Initialize spark for ETL to parquet file
 #------------------------------------------------
-sparkql = pyspark.sql.SparkSession.builder.master('local').getOrCreate()
+data_dir = DATA_DIR
 
-data_dir = '/usr/local/airflow/data'
-
-file_names = ['ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
-
-columns = 'stock_name string, date string, open float, high float, low float, close float, adj_close float, volume int' #schema to use
-
-df = sparkql.read.csv(os.path.join(data_dir,'AAPL.csv'), header=True)
-df = df.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume') #rename the columns
-df = df.withColumn('stock_name', sf.lit('AAPL')) #add column with stock name
-
-#create composite key
-df.createOrReplaceTempView("comp_key") 
-df = sparkql.sql("SELECT CONCAT(stock_name, date) AS sd_id, stock_name, date, open, high, low, close, adj_close, volume FROM comp_key")
-df = df.select('sd_id','stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume')
-
-#create df for each csv, transform it and then consolidate into one dataframe
-for csv in file_names:
-    idf = sparkql.read.csv(os.path.join(data_dir,csv+'.csv'), header=True)
-    idf = idf.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume') #rename the columns
-    idf = idf.withColumn('stock_name', sf.lit(csv)) #add column with stock name
-
-    #create composite key
-    idf.createOrReplaceTempView("key") 
-    idf = sparkql.sql("SELECT CONCAT(stock_name, date) AS sd_id, stock_name, date, open, high, low, close, adj_close, volume FROM key")
-    idf = idf.select('sd_id','stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume')
+file_names = ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
     
-    #concat to df
-    df = df.union(idf)
+old_names = ['Date','Open','High','Low','Close','Adj Close','Volume']
+new_names = ['date', 'open', 'high', 'low', 'close', 'adj_close', 'volume']
+    
+rename_dict = {item[0]:item[1] for item in zip(old_names,new_names)}
 
-# Write to parquet file. Used coalesce in order to have one parquet file
-df.coalesce(1).write.format("parquet").save(os.path.join(data_dir,'all_tech_stocks.parquet'))
+li = []
+
+for file in file_names:
+    idf = pd.read_csv(os.path.join(data_dir,f'{file}.csv'),header=0)
+    
+    idf = idf.rename(columns=rename_dict)
+    
+    idf.insert(0,'stock_name', file)
+    
+    idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
+    
+    li.append(idf)
+
+df = pd.concat(li, axis=0)
+
+df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
 
 #load stocks parquet file into BigQuery
 #------------------------------------------------
@@ -79,18 +74,16 @@ client = bigquery.Client(credentials=credentials, project=credentials.project_id
 dataset_id = f"{PROJECT_NAME}.{DATASET_NAME}"
 table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
 
-data_dir = '../data/all_tech_stocks.parquet'
-
 #rename the parquet file in order to load to BigQuery
-parq = '.snappy.parquet'
-crc = '.crc'
-for file_name in os.listdir(data_dir):
-    source = data_dir + file_name
-    if parq in source and crc not in source:
-        os.rename(os.path.join(data_dir,file_name),os.path.join(data_dir,'stocks.parquet'))
+#parq = '.snappy.parquet'
+#crc = '.crc'
+#for file_name in os.listdir(data_dir):
+    #source = data_dir + file_name
+    #if parq in source and crc not in source:
+        #os.rename(os.path.join(data_dir,file_name),os.path.join(data_dir,'stocks.parquet'))
     
 #filepath to get loaded to BigQuery
-DATA_FILE = os.path.join(data_dir,'stocks.parquet')
+DATA_FILE = os.path.join(data_dir,'all_stocks.parquet')
 
 TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),

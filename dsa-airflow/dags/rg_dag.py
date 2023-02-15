@@ -5,7 +5,8 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.sensors.filesystem import FileSensor
 from airflow.hooks.filesystem import FSHook
-
+from airflow.models import Variable
+import yaml
 
 # local imports
 from rg_work import create_dataset, create_stocks_table, data_dir, config
