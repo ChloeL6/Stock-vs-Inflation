@@ -14,7 +14,7 @@ import pyspark.sql.types as st          # st = spark types
 
 #SETUP config and FileSensor data dir path
 #------------------------------------------------
-_default_config_path = './config.yml'
+_default_config_path = '/usr/local/airflow/dags/config.yml'
 CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
 config: dict = {}
 with open(CONF_PATH) as open_yaml:
@@ -28,7 +28,7 @@ DATA_DIR = data_fs.get_path()
 #------------------------------------------------
 sparkql = pyspark.sql.SparkSession.builder.master('local').getOrCreate()
 
-data_dir = '../data'
+data_dir = '/usr/local/airflow/data'
 
 file_names = ['ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
 
@@ -39,8 +39,8 @@ df = df.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume') #ren
 df = df.withColumn('stock_name', sf.lit('AAPL')) #add column with stock name
 
 #create composite key
-df.createOrReplaceTempView("key") 
-df = sparkql.sql("SELECT CONCAT(stock_name, date) AS sd_id, stock_name, date, open, high, low, close, adj_close, volume FROM key")
+df.createOrReplaceTempView("comp_key") 
+df = sparkql.sql("SELECT CONCAT(stock_name, date) AS sd_id, stock_name, date, open, high, low, close, adj_close, volume FROM comp_key")
 df = df.select('sd_id','stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume')
 
 #create df for each csv, transform it and then consolidate into one dataframe
