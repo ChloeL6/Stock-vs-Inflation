@@ -93,6 +93,22 @@ def get_client() -> bigquery.Client:
         logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
     return _client
 
+def check_bigquery_client():
+    """
+    task to see if we can successfully create a bigquery client
+    """
+    # check if $GOOGLE_APPLICATION_CREDENTIALS is set
+    google_app_creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if (google_app_creds is None) or (not os.path.exists(google_app_creds)):
+        logger.warn("GOOGLE_APPLICATION_CREDENTIALS is not set properly!")
+        logger.warn("You most likely have not edited the docker-compose.yaml file correctly. You must restart docker-compose after doing so.")
+    # client from dsa_utils.table_definitions module
+    logger.info("checking bigquery client")
+    client = get_client()
+    location = client.location
+    logger.info(f"bigquery client is good. bigquery location: {location}")
+
+
 def cpi_transformation():
     # read and rename cpi file / parse_dates=['Yearmon']
     cpi  = pd.read_csv(os.path.join(DATA_DIR, cpi_file), header=0)
