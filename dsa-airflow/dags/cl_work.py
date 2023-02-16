@@ -89,6 +89,7 @@ def get_client() -> bigquery.Client:
 
 
 # Define table schemas
+#avg cpi table
 CPI_METADATA = {
     'cpi_rates': {
         'table_name': 'cpi_rates',
@@ -97,6 +98,7 @@ CPI_METADATA = {
             bigquery.SchemaField("cpi", "FLOAT", mode="REQUIRED")]
     }}
 
+#avg unemployment table
 UNEMP_METADATA = {
     'unemployment_rates' :{
         'table_name': 'unemployment_rates',
@@ -105,6 +107,7 @@ UNEMP_METADATA = {
             bigquery.SchemaField("avg_unemp_per_year", "FLOAT", mode="REQUIRED")]
     }}
 
+#avg stock table
 STOCK_METADATA = {
     'avg_stock_price_per_year': {
         'table_name': 'avg_stock_price_per_year',
