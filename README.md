@@ -11,15 +11,12 @@
 * Python
 * Jupyter
 * Airflow
-* Astro CLI
-* Spark
 * BigQuery
 * Looker Studio
 * SQL
 * Pandas
 * Git
 * Markdown
-* NumPy
 * `.gitignore`
 * `requirements.txt`
   
@@ -28,11 +25,13 @@
 ## Datasets Used
 
 1. [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices)
-2. 
+2. [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset)
+3. [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package)
 
 </br>
 
 ## Description
+
 
 
 
