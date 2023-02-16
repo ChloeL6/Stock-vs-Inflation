@@ -6,6 +6,7 @@ from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
 import yaml
 import os
+from datetime import datetime
 
 
 #SETUP config and FileSensor data dir path
@@ -40,6 +41,12 @@ def stocks_transform():
         #rename the columns
         idf = idf.rename(columns=rename_dict)
         #insert column with the stock name
+        idf['date'] = pd.to_datetime(idf['date'], format='%Y-%m-%d')
+
+        idf.insert(0,'day', idf['date'].dt.day)
+        idf.insert(0,'month', idf['date'].dt.month)
+        idf.insert(0,'year', idf['date'].dt.year)
+        
         idf.insert(0,'stock_name', file)
         #insert column with composite key
         idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
@@ -71,6 +78,9 @@ STOCKS_TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('stock_name', 'STRING', mode='NULLABLE'),
     bigquery.SchemaField('date', 'DATE', mode='NULLABLE'),
+    bigquery.SchemaField('year', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('month', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('day', 'INTEGER', mode='NULLABLE'),
     bigquery.SchemaField('open', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('high', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('low', 'FLOAT', mode='NULLABLE'),
@@ -81,6 +91,8 @@ STOCKS_TABLE_SCHEMA = [
 
 M2_TABLE_SCHEMA = [
     bigquery.SchemaField('date_monthly', 'DATE', mode='REQUIRED'),
+    bigquery.SchemaField('year', 'INTEGER', mode='REQUIRED'),
+    bigquery.SchemaField('month', 'INTEGER', mode='REQUIRED'),
     bigquery.SchemaField('m2_supply', 'FLOAT', mode='NULLABLE'),
     ]
 
@@ -112,6 +124,11 @@ def m2_transform():
     m2df = pd.read_csv(os.path.join(data_dir,f'FRB_H6.csv'),header=5)
     m2df = m2df[['Time Period', 'M2_N.M']]
     m2df = m2df.rename(columns={'Time Period': 'date_monthly', 'M2_N.M':'m2_supply'})
+
+    m2df['date_monthly'] = pd.to_datetime(m2df['date_monthly'], format='%Y-%m')
+
+    m2df.insert(0,'month', m2df['date_monthly'].dt.month)
+    m2df.insert(0,'year', m2df['date_monthly'].dt.year)
 
     m2df.to_parquet(os.path.join(data_dir,'m2_supply.parquet'))
 
