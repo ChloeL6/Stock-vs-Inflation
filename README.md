@@ -31,24 +31,17 @@
 </br>
 
 ## Description
+[<img src="imgs/stocks_no_btc.png" alt="stocks no btc snapshot" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
-
-
-
-#### Architectural diagram:
-
-
-<br>
-
-#### Data Model:
+[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
 
 <br>
 
-<br>
+#### DAGs of Data Pipeline:
 
-#### Data Pipeline:
-<img src="imgs/ETL_pipeline.png" alt="Architectural diagram" width="640"/>
+<img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
+
 
 <br>
 
