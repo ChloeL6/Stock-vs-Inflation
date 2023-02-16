@@ -14,60 +14,53 @@ import os
 
 #SETUP config and FileSensor data dir path
 #------------------------------------------------
-config = {'project': 'team-week-3', 'dataset': 'tech_stocks_world_events',
-'key_path': "/opt/airflow/creds/team-week-3-2508efd8ce08.json"}
+#config = {'project': 'team-week-3', 'dataset': 'tech_stocks_world_events'}
 
-#_default_config_path = './config.yml'
-#CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
-#config: dict = {}
-#with open(CONF_PATH) as open_yaml:
-    #config: dict =  yaml.full_load(open_yaml)
+_default_config_path = '/opt/airflow/dags/config.yml'
+CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
+config: dict = {}
+with open(CONF_PATH) as open_yaml:
+    config: dict =  yaml.full_load(open_yaml)
     
 data_fs = FSHook(conn_id='data_fs')     # get airflow connection for data_fs
-DATA_DIR = data_fs.get_path()  
-
+data_dir = data_fs.get_path()  
 
 #Initialize spark for ETL to parquet file
 #------------------------------------------------
-data_dir = DATA_DIR
 
 def transform():
     file_names = ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
-        
+
+    #renaming the columns   
     old_names = ['Date','Open','High','Low','Close','Adj Close','Volume']
     new_names = ['date', 'open', 'high', 'low', 'close', 'adj_close', 'volume']
-        
     rename_dict = {item[0]:item[1] for item in zip(old_names,new_names)}
 
+    #empty list to get all dataframes for concat
     li = []
 
+    #extract and transform all of the files 
     for file in file_names:
         idf = pd.read_csv(os.path.join(data_dir,f'{file}.csv'),header=0)
-        
+        #rename the columns
         idf = idf.rename(columns=rename_dict)
-        
+        #insert column with the stock name
         idf.insert(0,'stock_name', file)
-        
+        #insert column with comp key
         idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
         
         li.append(idf)
 
+    #consolidate all files into one
     df = pd.concat(li, axis=0)
-    
+    #save consolidated df into parquet file
     df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
 
 
 #load stocks parquet file into BigQuery
 #------------------------------------------------
-
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
-
-#key_path = config['key_path']
-
-#credentials = service_account.Credentials.from_service_account_file(
-    #key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"],
-#)
 
 #create bigquery client
 client = bigquery.Client()#credentials=credentials, project=credentials.project_id)
@@ -75,17 +68,6 @@ client = bigquery.Client()#credentials=credentials, project=credentials.project_
 #create dataset_id and table_ids
 dataset_id = f"{PROJECT_NAME}.{DATASET_NAME}"
 table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
-
-#rename the parquet file in order to load to BigQuery
-#parq = '.snappy.parquet'
-#crc = '.crc'
-#for file_name in os.listdir(data_dir):
-    #source = data_dir + file_name
-    #if parq in source and crc not in source:
-        #os.rename(os.path.join(data_dir,file_name),os.path.join(data_dir,'stocks.parquet'))
-
-#filepath to get loaded to BigQuery
-#DATA_FILE = os.path.join(data_dir,all_stocks_file)
 
 TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
