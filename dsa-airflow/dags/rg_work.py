@@ -65,7 +65,7 @@ client = bigquery.Client()
 #create dataset_id and table_ids
 dataset_id = f"{PROJECT_NAME}.{DATASET_NAME}"
 stocks_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
-m2_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
+m2_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.m2_supply"
 
 STOCKS_TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
