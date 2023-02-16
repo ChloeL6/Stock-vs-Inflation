@@ -73,6 +73,7 @@ client = bigquery.Client()
 dataset_id = f"{PROJECT_NAME}.{DATASET_NAME}"
 stocks_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
 m2_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.m2_supply"
+g_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.gas_prices"
 
 STOCKS_TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
@@ -94,6 +95,16 @@ M2_TABLE_SCHEMA = [
     bigquery.SchemaField('year', 'INTEGER', mode='REQUIRED'),
     bigquery.SchemaField('month', 'INTEGER', mode='REQUIRED'),
     bigquery.SchemaField('m2_supply', 'FLOAT', mode='NULLABLE'),
+    ]
+
+GAS_TABLE_SCHEMA = [
+    bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
+    bigquery.SchemaField('year', 'DATE', mode='NULLABLE'),
+    bigquery.SchemaField('month', 'DATE', mode='NULLABLE'),
+    bigquery.SchemaField('all_grade_prices', 'FLOAT', mode='NULLABLE'),
+    bigquery.SchemaField('reg_grade_prices', 'FLOAT', mode='NULLABLE'),
+    bigquery.SchemaField('mid_grade_prices', 'FLOAT', mode='NULLABLE'),
+    bigquery.SchemaField('prem_grade_prices', 'FLOAT', mode='NULLABLE'),
     ]
 
 def create_dataset():
@@ -149,7 +160,7 @@ def create_m2_table():
     job.result()
 
 def gas_transform():
-    gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=5)
+    gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=0)
     gdf = gdf[['Date', 'A1', 'R1', 'M1', 'P1']]
     gdf = gdf.rename(columns={'Date': 'date', 'A1':'all_grade_prices', 'R1':'reg_grade_prices', 'M1':'mid_grade_prices', 'P1':'prem_grade_prices'})
 
@@ -158,4 +169,23 @@ def gas_transform():
     gdf.insert(0,'month', gdf['date'].dt.month)
     gdf.insert(0,'year', gdf['date'].dt.year)
 
+    gdf = gdf.groupby(['date','year','month']).agg({'all_grade_prices': 'mean', 'reg_grade_prices': 'mean', 'mid_grade_prices': 'mean', 'prem_grade_prices': 'mean'})
+    gdf = gdf.reset_index()
+
     gdf.to_parquet(os.path.join(data_dir,'gas_prices.parquet'))
+
+def create_gas_table():
+    job_config = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.PARQUET,
+            autodetect=True,
+            create_disposition='CREATE_NEVER',
+            write_disposition='WRITE_TRUNCATE',
+            ignore_unknown_values=True,
+        )
+    table = bigquery.Table(g_table_id, schema=GAS_TABLE_SCHEMA)
+    table = client.create_table(table, exists_ok=True)
+
+    with open(os.path.join(data_dir, 'gas_prices.parquet'), "rb") as source_file:
+        job = client.load_table_from_file(source_file, g_table_id, job_config=job_config)
+
+    job.result()
