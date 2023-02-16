@@ -22,7 +22,7 @@ table_names = ['stocks']
 # -----------------------------------------
 
 with DAG(
-    dag_id='dsa_tables_load',
+    dag_id='ETL_stocks_table_load',
     schedule_interval='@once',
     start_date=datetime.utcnow(),
     catchup=False,
