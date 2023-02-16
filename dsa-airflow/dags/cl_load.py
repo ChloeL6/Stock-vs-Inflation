@@ -10,12 +10,11 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor
-from cl_work import get_client, config, cpi_transformation, unemp_transformation, load_table, create_table
+from cl_work import check_bigquery_client, config, cpi_transformation, unemp_transformation, load_table, create_table
 
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
 KEY_PATH = config['cl_key_path']
-TABLE_ID = 'stocks'
 
 default_args = {
     'start_date': days_ago(2), # The start date for DAG running. This function allows us to set the start date to two days ago
@@ -26,14 +25,14 @@ default_args = {
 
 # instantiate a DAG!
 with DAG(
-    'ETL pipeline', 
+    'ETL_pipeline', 
     description='A DAG to do transformation once files are detected',
     default_args=default_args,
 ) as dag:
 
   check_bq_client = PythonOperator(
     task_id = "check_bq_client",
-    python_callable=get_client
+    python_callable=check_bigquery_client
   )
 
   wait_for_files = FileSensor(
@@ -91,4 +90,4 @@ with DAG(
   # create empty task to branch back in
   done = DummyOperator(task_id='done')
 
-check_bq_client >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> t2 >> done
+check_bq_client >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> t2 >> load_tasks >> done
