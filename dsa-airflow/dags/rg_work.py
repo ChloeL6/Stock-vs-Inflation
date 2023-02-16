@@ -48,7 +48,7 @@ def transform():
         idf.insert(0,'stock_name', file)
         #insert column with comp key
         idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
-        
+
         li.append(idf)
 
     #consolidate all files into one
