@@ -9,8 +9,13 @@ from airflow.hooks.filesystem import FSHook
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from cl_work import get_client
+from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor
+from cl_work import get_client, config, cpi_transformation, unemp_transformation, load_table, create_table
 
+PROJECT_NAME = config['project']
+DATASET_NAME = config['dataset']
+KEY_PATH = config['cl_key_path']
+TABLE_ID = 'stocks'
 
 default_args = {
     'start_date': days_ago(2), # The start date for DAG running. This function allows us to set the start date to two days ago
@@ -31,21 +36,35 @@ with DAG(
     python_callable=get_client
   )
 
-  wait_for_files = PythonOperator(
-    task_id='wait_for_file',
-    python_callable=wait_for_files
+  wait_for_files = FileSensor(
+    task_id='wait_for_files',
+    poke_interval=15,                   
+    timeout=(30 * 60),                  
+    mode='poke',                        
+    filepath='/data',                    
+    fs_conn_id='data_fs'
   )
 
-  wait_for_stocks_file = PythonOperator()
+  cpi_transform=PythonOperator(
+    task_id='cpi_transform', 
+    python_callable=cpi_transformation
+  )
 
-  cpi_transformation=PythonOperator()
-  unemp_transformation=PythonOperator()
-  stock_transformation=PythonOperator()
+  unemp_transform=PythonOperator(
+    task_id='unemp_transform',
+    python_callable=unemp_transformation
+  )
 
-  create_table = PythonOperator()
+  create_tables = PythonOperator(
+    task_id='create_tables',
+    python_callable=create_table
+  )
 
-  load_table=PythonOperator()
+  load_tables=PythonOperator(
+    task_id='load_tables',
+    python_callable=load_table
+  )
 
 
 
-check_bq_client >> [wait_for_files, wait_for_stocks_file] >> [cpi_transformation , , ] >> create_table >> load_table
+check_bq_client >> wait_for_files >> [cpi_transformation ] >> create_table >> load_table
