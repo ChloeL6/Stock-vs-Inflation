@@ -73,12 +73,22 @@ with DAG(
       
       create_tasks.append(task)
 
-  t1=DummyOperator(task_id='create_tables')
-  load_tables=PythonOperator(
-    task_id='load_tables',
-    python_callable=load_table
-  )
+  # create empty task to branch out to loading files
+  t2=DummyOperator(task_id='load_files')
 
+  # create a separate task for loading files
+  load_tasks = []
+  for table_name in table_names:
+      task = PythonOperator(
+        task_id=f'load_{table_name}_table',
+        python_callable=load_table,
+        op_kwargs={'table_name': table_name},
+        doc_md=create_table.__doc__ 
+     )
+      
+      load_tasks.append(task)
 
+  # create empty task to branch back in
+  done = DummyOperator(task_id='done')
 
-check_bq_client >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> load_tables
+check_bq_client >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> t2 >> done
