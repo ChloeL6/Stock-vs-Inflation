@@ -147,3 +147,15 @@ def create_m2_table():
         job = client.load_table_from_file(source_file, m2_table_id, job_config=job_config)
 
     job.result()
+
+def gas_transform():
+    gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=5)
+    gdf = gdf[['Date', 'A1', 'R1', 'M1', 'P1']]
+    gdf = gdf.rename(columns={'Date': 'date', 'A1':'all_grade_prices', 'R1':'reg_grade_prices', 'M1':'mid_grade_prices', 'P1':'prem_grade_prices'})
+
+    gdf['date'] = pd.to_datetime(gdf['date'], format='%m/%d/%Y')
+
+    gdf.insert(0,'month', gdf['date'].dt.month)
+    gdf.insert(0,'year', gdf['date'].dt.year)
+
+    gdf.to_parquet(os.path.join(data_dir,'gas_prices.parquet'))
