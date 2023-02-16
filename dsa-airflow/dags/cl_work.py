@@ -19,6 +19,14 @@ from google.cloud.exceptions import NotFound
 
 
 
+cpi_file = 'US-CPI.csv'
+unemp_file = 'USUnemployment.csv'
+
+cpi_complete = 'cpi.csv'
+unemp_complete = 'unemp.csv'
+
+DATA_DIR = '../data'
+
 # -------------------------------------------
 # Set up logging
 # -------------------------------------------
@@ -44,8 +52,6 @@ def get_this_dir(filepath: str = __file__) -> str:
 # Load config file
 # -------------------------------------------
 
-# default config file path when running locally (not within airflow docker container)
-# get the path from airflow variables OR set it to default local path
 _default_config_path = os.path.join(get_this_dir(), './config.yml')
 CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
 config: dict = {}
@@ -53,9 +59,9 @@ with open(CONF_PATH) as open_yaml:
     config: dict =  yaml.full_load(open_yaml)
     logger.info(f"loaded configurations file: {CONF_PATH}")
 
-# Set data dir path
-_default_data_dir_path = os.path.join(get_this_dir(), '../data')
-DATA_DIR = Variable.get('data_dir', default_var=_default_data_dir_path)
+# # Set data dir path
+# _default_data_dir_path = os.path.join(get_this_dir(), '../data')
+# DATA_DIR = Variable.get('data_dir', default_var=_default_data_dir_path)
 
 
 
@@ -87,6 +93,35 @@ def get_client() -> bigquery.Client:
         logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
     return _client
 
+def cpi_transformation():
+    # read and rename cpi file / parse_dates=['Yearmon']
+    cpi  = pd.read_csv(os.path.join(DATA_DIR, cpi_file), header=0)
+    cpi = cpi.rename(columns={'Yearmon': 'year', 'CPI': 'cpi'})
+    cpi[['month', 'date', 'year']] = cpi.year.str.split("-", expand=True)
+
+    # calculate the avg yearly cpi rate
+    cpi['avg_cpi_per_year'] = cpi.groupby('year')['cpi'].transform('mean')
+    cpi[['month','year','date']] = cpi[['month','year','date']].astype('int')
+
+    # write to file
+    cpi.to_csv(os.path.join(DATA_DIR, 'cpi.csv'), header=True, index=False)
+
+    print('File is created from cpi dataframe')
+
+
+def unemp_transformation():
+    # read and rename unemployment file
+    unemp = pd.read_csv(os.path.join(DATA_DIR, unemp_file), header=0)
+    unemp.columns = unemp.columns.str.lower()
+
+    # calculate the avg yearly unemp. rate
+    columns = ['jan',	'feb',	'mar',	'apr',	'may'	,'jun',	'jul',	'aug',	'sep',	'oct',	'nov',	'dec']
+    unemp['avg_unemp_per_year']  = unemp[columns].mean(axis=1)
+
+    unemp.to_csv(os.path.join(DATA_DIR, 'unemp.csv'), header=True, index=False)
+
+    print('File is created from unemp dataframe')
+
 
 # Define table schemas
 #avg cpi table
@@ -99,28 +134,14 @@ UNEMPLOYMENT_RATES = [
             bigquery.SchemaField("year", "INTEGER", mode="REQUIRED"),
             bigquery.SchemaField("avg_unemp_per_year", "FLOAT", mode="REQUIRED")]
 
-#avg stock table
-AVG_STOCK_PRICE_PER_YEAR = [
-            bigquery.SchemaField("stock_name", "STRING", mode="REQUIRED"),
-            bigquery.SchemaField("year", "INTEGER", mode="REQUIRED"),
-            bigquery.SchemaField("open", "FLOAT", mode="REQUIRED"),
-            bigquery.SchemaField("high", "FLOAT", mode="REQUIRED"),
-            bigquery.SchemaField("low", "FLOAT", mode="REQUIRED"),
-            bigquery.SchemaField("close", "FLOAT", mode="REQUIRED"),
-            bigquery.SchemaField("adj_close", "FLOAT", mode="REQUIRED"),
-            bigquery.SchemaField("volume", "FLOAT", mode="REQUIRED"),
-            bigquery.SchemaField("__index_level_0__", "FLOAT", mode="REQUIRED")]
-
 # global dict to hold all tables schemas
 TABLE_SCHEMAS = {
     'cpi_rates': 'CPI_RATES',
-    'unemployment_rates': 'UNEMPLOYMENT_RATES',
-    'avg_stock_price_per_year': 'AVG_STOCK_PRICE_PER_YEAR'
+    'unemployment_rates': 'UNEMPLOYMENT_RATES'
 }
 
 
 def create_table(table_name: str) -> None:
-    
     assert table_name in TABLE_SCHEMAS, f"Table schema not found for table name: {table_name}"
 
     client = get_client()
@@ -143,34 +164,44 @@ def create_table(table_name: str) -> None:
     logger.info(f"created bigquery table: {table_id}")
 
 
-def load_table() -> None:
+# global variable to hold data file
+DATA_FILES = { 
+    'cpi_rates': os.path.join(DATA_DIR, cpi_complete),
+    'unemployment_rates': os.path.join(DATA_DIR, unemp_complete)}
+
+
+# load table function 
+def load_table(table_name: str):
+
+    # make sure table_name is one of our data files
+    assert table_name in DATA_FILES, f"Unknown table name: {table_name}"
     
+    client = get_client()
+    data_file = DATA_FILES[table_name]
+
+    # check to see if data file exists
+    assert os.path.exists(data_file), f"Missing data file: {data_file}"
+
+    # insert data into bigquery
+    table_id = f"{PROJECT_NAME}.{DATASET_NAME}.cpi_rates"
+
+    # bigquery job config to load from a dataframe
     job_config = bigquery.LoadJobConfig(
-        df=pd.DataFrame, 
-        client=bigquery.Client, 
-        table_name=str, 
-        schema=bigquery.SchemaField,
-        create_disposition= 'CREATE_NEVER', 
-        write_disposition=str = 'WRITE_TRUNCATE',
+        source_format=bigquery.SourceFormat.CSV,
+        skip_leading_rows=1,
+        autodetect=True,
+        create_disposition='CREATE_NEVER',
+        write_disposition='WRITE_TRUNCATE',
+        max_bad_records=100,
+        ignore_unknown_values=True,
     )
-    
-    job = client.load_table_from_dataframe(df, destination=table_name, job_config=job_config)
-    job.result()        # wait for the job to finish
-        # get the number of rows inserted
+    logger.info(f"loading bigquery {table_name} from file: {data_file}")
+    with open(data_file, "rb") as source_file:
+        job = client.load_table_from_file(source_file, table_id, job_config=job_config)
+    # wait for the job to complete
+    job.result()
+    # get the number of rows inserted
     table = client.get_table(table_id)
     logger.info(f"inserted {table.num_rows} rows to {table_id}")
 
 
-
-
-def wait_for_file():
-    # define the file sensor...
-    # wait for the airports file in the "data_fs" filesystem connection
-    wait_for_file = FileSensor(
-        task_id='wait_for_file',
-        poke_interval=15,                   # check every 15 seconds
-        timeout=(30 * 60),                  # timeout after 30 minutes
-        mode='poke',                        # mode: poke, reschedule
-        filepath='/data'                    # file path to check (relative to fs_conn)
-        fs_conn_id='data_fs',               # file system connection (root path)
-    )
