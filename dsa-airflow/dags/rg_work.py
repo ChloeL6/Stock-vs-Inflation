@@ -115,3 +115,18 @@ def m2_transform():
 
     m2df.to_parquet(os.path.join(data_dir,'m2_supply.parquet'))
 
+def create_m2_table():
+    job_config = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.PARQUET,
+            autodetect=True,
+            create_disposition='CREATE_NEVER',
+            write_disposition='WRITE_TRUNCATE',
+            ignore_unknown_values=True,
+        )
+    table = bigquery.Table(m2_table_id, schema=M2_TABLE_SCHEMA)
+    table = client.create_table(table, exists_ok=True)
+
+    with open(os.path.join(data_dir, 'm2_supply.parquet'), "rb") as source_file:
+        job = client.load_table_from_file(source_file, m2_table_id, job_config=job_config)
+
+    job.result()
