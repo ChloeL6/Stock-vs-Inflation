@@ -55,11 +55,25 @@ with DAG(
     python_callable=unemp_transformation
   )
 
-  create_tables = PythonOperator(
-    task_id='create_tables',
-    python_callable=create_table
-  )
+  t1=DummyOperator(task_id='create_tables')
 
+
+  # create a separate task for creating each table
+  table_names = ['cpi_rates', 'unemployment_rates']
+
+  create_tasks = []
+
+  for table_name in  table_names:
+      task = PythonOperator(
+        task_id=f'create_{table_name}table',
+        python_callable=create_table,
+        op_kwargs={'table_name': table_name},
+        doc_md=create_table.__doc__                 # take function docstring
+        )
+      
+      create_tasks.append(task)
+
+  t1=DummyOperator(task_id='create_tables')
   load_tables=PythonOperator(
     task_id='load_tables',
     python_callable=load_table
@@ -67,4 +81,4 @@ with DAG(
 
 
 
-check_bq_client >> wait_for_files >> [cpi_transformation ] >> create_table >> load_table
+check_bq_client >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> load_tables
