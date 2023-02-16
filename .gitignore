@@ -4,4 +4,3 @@ logs/
 plugins/
 docker-compose.yaml
 .env
-dsa-airflow/cred/
