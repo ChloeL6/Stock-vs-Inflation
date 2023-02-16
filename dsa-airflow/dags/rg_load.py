@@ -9,9 +9,9 @@ from airflow.models import Variable
 import yaml
 
 # local imports
-from rg_work import create_dataset, create_stocks_table, data_dir, config, transform
+from rg_work import create_dataset, create_stocks_table, data_dir, config, stocks_transform, m2_transform, create_m2_table
 
-data_file_names1 = ['AAPL', 'ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM']
+data_file_names1 = ['AAPL', 'ADBE','AMZN', 'Bitcoin', 'CRM', 'CSCO', 'GOOGL', 'IBM']
 data_file_names2 = ['INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA']
 
 
@@ -22,7 +22,7 @@ table_names = ['stocks']
 # -----------------------------------------
 
 with DAG(
-    dag_id='ETL_stocks_table_load',
+    dag_id='ETL_stocks_bitcoin_table_load',
     schedule_interval='@once',
     start_date=datetime.utcnow(),
     catchup=False,
@@ -56,7 +56,7 @@ with DAG(
         )
         check_1.append(check)
     
-    check_1_com = EmptyOperator(task_id='tech_stocks_group_1')
+    check_1_com = EmptyOperator(task_id='tech_stocks_bitcoin_group_1')
 
     check_2 = []
     for file in data_file_names2:
@@ -72,13 +72,19 @@ with DAG(
     
     check_2_com = EmptyOperator(task_id='tech_stocks_group_2')
 
-    transform_task = PythonOperator(
-        task_id='transformations',
-        python_callable = transform,
-        doc_md = transform.__doc__        # adding function docstring as task doc
+    stock_transf_task = PythonOperator(
+        task_id='stock_transformations',
+        python_callable = stocks_transform,
+        doc_md = stocks_transform.__doc__        # adding function docstring as task doc
     )
 
-    parquet_task = EmptyOperator(task_id='create_parquet_file')
+    m2_transf_task = PythonOperator(
+        task_id='m2_transformations',
+        python_callable = m2_transform,
+        doc_md = m2_transform.__doc__        # adding function docstring as task doc
+    )
+
+    parquet_task = EmptyOperator(task_id='create_parquet_files')
 
     t0 = PythonOperator(
         task_id='create_dataset',
@@ -88,9 +94,15 @@ with DAG(
 
     
     stocks_table_task = PythonOperator(
-        task_id=f"load_stocks_table",
+        task_id=f"load_stocks_bitcoin_table",
         python_callable=create_stocks_table,               # call the dsa_utils.table_definitions.create_table
         doc_md=create_stocks_table.__doc__                 # take function docstring
     )
 
-    check_1 >> check_1_com >> check_2 >> check_2_com >> transform_task >> parquet_task >> t0 >> stocks_table_task
+    m2_table_task = PythonOperator(
+        task_id=f"load_m2_supply_table",
+        python_callable=create_m2_table,               # call the dsa_utils.table_definitions.create_table
+        doc_md=create_m2_table.__doc__                 # take function docstring
+    )
+
+    check_1 >> check_1_com >> check_2 >> check_2_com >> [stock_transf_task, m2_transf_task] >> parquet_task >> t0 >> [stocks_table_task, m2_table_task]

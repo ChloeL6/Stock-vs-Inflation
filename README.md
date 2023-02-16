@@ -11,15 +11,12 @@
 * Python
 * Jupyter
 * Airflow
-* Astro CLI
-* Spark
 * BigQuery
 * Looker Studio
 * SQL
 * Pandas
 * Git
 * Markdown
-* NumPy
 * `.gitignore`
 * `requirements.txt`
   
@@ -28,28 +25,23 @@
 ## Datasets Used
 
 1. [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices)
-2. 
+2. [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset)
+3. [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package)
 
 </br>
 
 ## Description
+[<img src="imgs/stocks_no_btc.png" alt="stocks no btc snapshot" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
-
-
-#### Architectural diagram:
-
-
-<br>
-
-#### Data Model:
+[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
 
 <br>
 
-<br>
+#### DAGs of Data Pipeline:
 
-#### Data Pipeline:
-<img src="imgs/ETL_pipeline.png" alt="Architectural diagram" width="640"/>
+<img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
+
 
 <br>
 
