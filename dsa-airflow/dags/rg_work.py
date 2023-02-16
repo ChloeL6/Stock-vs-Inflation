@@ -31,29 +31,31 @@ DATA_DIR = data_fs.get_path()
 #------------------------------------------------
 data_dir = DATA_DIR
 
-file_names = ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
-    
-old_names = ['Date','Open','High','Low','Close','Adj Close','Volume']
-new_names = ['date', 'open', 'high', 'low', 'close', 'adj_close', 'volume']
-    
-rename_dict = {item[0]:item[1] for item in zip(old_names,new_names)}
+def transform():
+    file_names = ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
+        
+    old_names = ['Date','Open','High','Low','Close','Adj Close','Volume']
+    new_names = ['date', 'open', 'high', 'low', 'close', 'adj_close', 'volume']
+        
+    rename_dict = {item[0]:item[1] for item in zip(old_names,new_names)}
 
-li = []
+    li = []
 
-for file in file_names:
-    idf = pd.read_csv(os.path.join(data_dir,f'{file}.csv'),header=0)
-    
-    idf = idf.rename(columns=rename_dict)
-    
-    idf.insert(0,'stock_name', file)
-    
-    idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
-    
-    li.append(idf)
+    for file in file_names:
+        idf = pd.read_csv(os.path.join(data_dir,f'{file}.csv'),header=0)
+        
+        idf = idf.rename(columns=rename_dict)
+        
+        idf.insert(0,'stock_name', file)
+        
+        idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
+        
+        li.append(idf)
 
-df = pd.concat(li, axis=0)
+    df = pd.concat(li, axis=0)
+    
+    df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
 
-df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
 
 #load stocks parquet file into BigQuery
 #------------------------------------------------
@@ -61,11 +63,11 @@ df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
 
-key_path = config['key_path']
+#key_path = config['key_path']
 
-credentials = service_account.Credentials.from_service_account_file(
-    key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"],
-)
+#credentials = service_account.Credentials.from_service_account_file(
+    #key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"],
+#)
 
 #create bigquery client
 client = bigquery.Client()#credentials=credentials, project=credentials.project_id)
@@ -81,9 +83,9 @@ table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
     #source = data_dir + file_name
     #if parq in source and crc not in source:
         #os.rename(os.path.join(data_dir,file_name),os.path.join(data_dir,'stocks.parquet'))
-    
+
 #filepath to get loaded to BigQuery
-DATA_FILE = os.path.join(data_dir,'all_stocks.parquet')
+#DATA_FILE = os.path.join(data_dir,all_stocks_file)
 
 TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
@@ -116,10 +118,8 @@ def create_stocks_table():
     table = bigquery.Table(table_id, schema=TABLE_SCHEMA)
     table = client.create_table(table, exists_ok=True)
 
-    with open(DATA_FILE, "rb") as source_file:
+    with open(os.path.join(data_dir, 'all_stocks.parquet'), "rb") as source_file:
         job = client.load_table_from_file(source_file, table_id, job_config=job_config)
+    #job = client.load_table_from_dataframe(transform(), table_id, job_config=job_config)
 
     job.result()
-
-create_dataset()
-create_stocks_table()

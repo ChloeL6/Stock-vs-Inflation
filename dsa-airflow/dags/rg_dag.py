@@ -9,10 +9,12 @@ from airflow.models import Variable
 import yaml
 
 # local imports
-from rg_work import create_dataset, create_stocks_table, data_dir, config
+from rg_work import create_dataset, create_stocks_table, data_dir, config, transform
 
-data_file_names = ['AAPL', 'ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA']
-DATA_FILES = {file: os.path.join(data_dir, file+'.csv') for file in data_file_names}
+data_file_names1 = ['AAPL', 'ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM']
+data_file_names2 = ['INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA']
+
+
 table_names = ['stocks']
 
 
@@ -42,8 +44,8 @@ with DAG(
     print(__file__)
     # pre-check task
 
-    check_0 = []
-    for file in DATA_FILES.keys():
+    check_1 = []
+    for file in data_file_names1:
         check = FileSensor(
             task_id=f'wait_for_{file}_file',
             poke_interval=15,                   # check every 15 seconds
@@ -52,19 +54,43 @@ with DAG(
             filepath=f'{file}.csv',        # file path to check  
             fs_conn_id='data_fs'   
         )
-        check_0.append(check)
+        check_1.append(check)
     
+    check_1_com = EmptyOperator(task_id='tech_stocks_group_1')
+
+    check_2 = []
+    for file in data_file_names2:
+        check = FileSensor(
+            task_id=f'wait_for_{file}_file',
+            poke_interval=15,                   # check every 15 seconds
+            timeout=(30 * 60),                  # timeout after 30 minutes
+            mode='poke',                        # mode: poke, reschedule
+            filepath=f'{file}.csv',        # file path to check  
+            fs_conn_id='data_fs'   
+        )
+        check_2.append(check)
+    
+    check_2_com = EmptyOperator(task_id='tech_stocks_group_2')
+
+    transform_task = PythonOperator(
+        task_id='transformations',
+        python_callable = transform,
+        doc_md = transform.__doc__        # adding function docstring as task doc
+    )
+
+    parquet_task = EmptyOperator(task_id='create_parquet_file')
+
     t0 = PythonOperator(
         task_id='create_dataset',
         python_callable = create_dataset,
         doc_md = create_dataset.__doc__        # adding function docstring as task doc
     )
 
-
+    
     stocks_table_task = PythonOperator(
-        task_id=f"create_stocks_table",
+        task_id=f"load_stocks_table",
         python_callable=create_stocks_table,               # call the dsa_utils.table_definitions.create_table
         doc_md=create_stocks_table.__doc__                 # take function docstring
     )
 
-    check_0 >> t0 >> stocks_table_task
+    check_1 >> check_1_com >> check_2 >> check_2_com >> transform_task >> parquet_task >> t0 >> stocks_table_task
