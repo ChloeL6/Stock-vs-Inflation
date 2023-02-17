@@ -75,23 +75,27 @@ PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
 KEY_PATH = config['cl_key_path']
 
-_client: bigquery.Client = None
-
-def get_client() -> bigquery.Client:
-    """
-    returns a bigquery client to the current project
-    Returns:
-        bigquery.Client: bigquery client
-    """
-    # check to see if the client has not been initialized
-    global _client
-    if _client is None:
-        # initialize the client
-        credentials = service_account.Credentials.from_service_account_file(KEY_PATH, 
+credentials = service_account.Credentials.from_service_account_file(KEY_PATH, 
                                                               scopes=["https://www.googleapis.com/auth/cloud-platform"])
-        _client = bigquery.Client(credentials=credentials, project=credentials.project_id)
-        logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
-    return _client
+_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+
+# _client: bigquery.Client = None
+
+# def get_client() -> bigquery.Client:
+#     """
+#     returns a bigquery client to the current project
+#     Returns:
+#         bigquery.Client: bigquery client
+#     """
+#     # check to see if the client has not been initialized
+#     global _client
+#     if _client is None:
+#         # initialize the client
+#         credentials = service_account.Credentials.from_service_account_file(KEY_PATH, 
+#                                                               scopes=["https://www.googleapis.com/auth/cloud-platform"])
+#         _client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+#         logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
+#     return _client
 
 def check_bigquery_client():
     """
@@ -104,7 +108,7 @@ def check_bigquery_client():
         logger.warn("You most likely have not edited the docker-compose.yaml file correctly. You must restart docker-compose after doing so.")
     # client from dsa_utils.table_definitions module
     logger.info("checking bigquery client")
-    client = get_client()
+    client = _client
     location = client.location
     logger.info(f"bigquery client is good. bigquery location: {location}")
 
@@ -160,7 +164,7 @@ TABLE_SCHEMAS = {
 def create_table(table_name: str) -> None:
     assert table_name in TABLE_SCHEMAS, f"Table schema not found for table name: {table_name}"
 
-    client = get_client()
+    client = _client
     table_id = f"{PROJECT_NAME}.{DATASET_NAME}.{table_name}"
 
     try:
@@ -192,7 +196,7 @@ def load_table(table_name: str):
     # make sure table_name is one of our data files
     assert table_name in DATA_FILES, f"Unknown table name: {table_name}"
     
-    client = get_client()
+    client = _client
     data_file = DATA_FILES[table_name]
 
     # check to see if data file exists
