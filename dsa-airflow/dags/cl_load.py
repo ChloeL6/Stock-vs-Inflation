@@ -10,11 +10,8 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor
-from cl_work import check_bigquery_client, config, cpi_transformation, unemp_transformation, load_table, create_table
+from cl_work import check_bigquery_client, cpi_transformation, unemp_transformation, load_table, create_table
 
-PROJECT_NAME = config['project']
-DATASET_NAME = config['dataset']
-KEY_PATH = config['cl_key_path']
 
 default_args = {
     'start_date': days_ago(2), # The start date for DAG running. This function allows us to set the start date to two days ago
@@ -64,7 +61,7 @@ with DAG(
 
   for table_name in  table_names:
       task = PythonOperator(
-        task_id=f'create_{table_name}table',
+        task_id=f'create_{table_name}_table',
         python_callable=create_table,
         op_kwargs={'table_name': table_name},
         doc_md=create_table.__doc__                 # take function docstring
