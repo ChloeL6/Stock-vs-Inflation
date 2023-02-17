@@ -1,2 +1,10 @@
 project: team-week-3
 dataset: 'tech_stocks_world_events'
+
+#csv file names for extraction
+stocks_file_names: ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA', 'Bitcoin']
+
+#output parquet file names
+stocks: outputs/all_stocks.parquet
+m2: outputs/m2_supply.parquet
+gas: outputs/gas_prices.parquet

@@ -25,7 +25,7 @@ data_dir = data_fs.get_path()
 #------------------------------------------------
 
 def stocks_transform():
-    file_names = ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA', 'Bitcoin'] #excluded AAPL to start df
+    file_names = config['stocks_file_names']
 
     #renaming the columns   
     old_names = ['Date','Open','High','Low','Close','Adj Close','Volume']
@@ -58,7 +58,7 @@ def stocks_transform():
     #set index to composite key
     df.set_index('sd_id', inplace=True)
     #save consolidated df into parquet file
-    df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
+    df.to_parquet(os.path.join(data_dir,config['stocks']))
 
 def m2_transform():
     m2df = pd.read_csv(os.path.join(data_dir,f'FRB_H6.csv'),header=5)
@@ -70,7 +70,7 @@ def m2_transform():
     m2df.insert(0,'month', m2df['date_monthly'].dt.month)
     m2df.insert(0,'year', m2df['date_monthly'].dt.year)
 
-    m2df.to_parquet(os.path.join(data_dir,'m2_supply.parquet'))
+    m2df.to_parquet(os.path.join(data_dir,config['m2']))
 
 def gas_transform():
     gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=0)
@@ -85,7 +85,7 @@ def gas_transform():
     gdf = gdf.groupby(['date','year','month']).agg({'all_grade_prices': 'mean', 'reg_grade_prices': 'mean', 'mid_grade_prices': 'mean', 'prem_grade_prices': 'mean'})
     gdf = gdf.reset_index()
 
-    gdf.to_parquet(os.path.join(data_dir,'gas_prices.parquet'))
+    gdf.to_parquet(os.path.join(data_dir,config['gas']))
 
 #Create project info and table schemas for load into BigQuery
 #------------------------------------------------
@@ -156,7 +156,7 @@ def create_stocks_table():
     table = bigquery.Table(stocks_table_id, schema=STOCKS_TABLE_SCHEMA)
     table = client.create_table(table, exists_ok=True)
 
-    with open(os.path.join(data_dir, 'all_stocks.parquet'), "rb") as source_file:
+    with open(os.path.join(data_dir, config['stocks']), "rb") as source_file:
         job = client.load_table_from_file(source_file, stocks_table_id, job_config=job_config)
 
     job.result()
@@ -172,7 +172,7 @@ def create_m2_table():
     table = bigquery.Table(m2_table_id, schema=M2_TABLE_SCHEMA)
     table = client.create_table(table, exists_ok=True)
 
-    with open(os.path.join(data_dir, 'm2_supply.parquet'), "rb") as source_file:
+    with open(os.path.join(data_dir, config['m2']), "rb") as source_file:
         job = client.load_table_from_file(source_file, m2_table_id, job_config=job_config)
 
     job.result()
@@ -188,7 +188,7 @@ def create_gas_table():
     table = bigquery.Table(g_table_id, schema=GAS_TABLE_SCHEMA)
     table = client.create_table(table, exists_ok=True)
 
-    with open(os.path.join(data_dir, 'gas_prices.parquet'), "rb") as source_file:
+    with open(os.path.join(data_dir, config['gas']), "rb") as source_file:
         job = client.load_table_from_file(source_file, g_table_id, job_config=job_config)
 
     job.result()
