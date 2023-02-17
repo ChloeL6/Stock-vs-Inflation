@@ -6,7 +6,7 @@ from airflow.operators.empty import EmptyOperator
 from airflow.sensors.filesystem import FileSensor
 from airflow.hooks.filesystem import FSHook
 from airflow.models import Variable
-from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceAsyncSensor, BigQueryTableExistenceSensor, BigQueryTablePartitionExistenceSensor
+from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor, BigQueryTablePartitionExistenceSensor
 
 import yaml
 
