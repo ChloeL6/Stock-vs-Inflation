@@ -25,7 +25,7 @@ unemp_file = 'USUnemployment.csv'
 cpi_complete = 'cpi.csv'
 unemp_complete = 'unemp.csv'
 
-DATA_DIR = '/data'
+# DATA_DIR = '/data'
 
 # -------------------------------------------
 # Set up logging
@@ -59,9 +59,9 @@ with open(CONF_PATH) as open_yaml:
     config: dict =  yaml.full_load(open_yaml)
     logger.info(f"loaded configurations file: {CONF_PATH}")
 
-# # Set data dir path
-# _default_data_dir_path = os.path.join(get_this_dir(), '../data')
-# DATA_DIR = Variable.get('data_dir', default_var=_default_data_dir_path)
+# Set data dir path
+_default_data_dir_path = os.path.join(get_this_dir(), '/data')
+DATA_DIR = Variable.get('data_dir', default_var=_default_data_dir_path)
 
 
 
@@ -142,7 +142,7 @@ def unemp_transformation():
 
 # Define table schemas
 #avg cpi table
-CPI_RATES =[
+CPI_RATES_SCHEMA =[
             bigquery.SchemaField("year", "INTEGER", mode="REQUIRED"),
             bigquery.SchemaField("cpi", "FLOAT", mode="REQUIRED"),
             bigquery.SchemaField("month", "INTEGER", mode="REQUIRED"),
@@ -150,7 +150,7 @@ CPI_RATES =[
             bigquery.SchemaField("avg_cpi_per_year", "FLOAT", mode="REQUIRED"),]
 
 #avg unemployment table
-UNEMPLOYMENT_RATES = [
+UNEMPLOYMENT_RATES_SCHEMA = [
             bigquery.SchemaField("year", "INTEGER", mode="REQUIRED"),
             bigquery.SchemaField("jan", "FLOAT", mode="REQUIRED"),
             bigquery.SchemaField("feb", "FLOAT", mode="REQUIRED"),
@@ -168,9 +168,8 @@ UNEMPLOYMENT_RATES = [
 
 # global dict to hold all tables schemas
 TABLE_SCHEMAS = {
-    'cpi_rates': 'CPI_RATES',
-    'unemployment_rates': 'UNEMPLOYMENT_RATES'
-}
+    'cpi_rates': CPI_RATES_SCHEMA,
+    'unemployment_rates': UNEMPLOYMENT_RATES_SCHEMA}
 
 
 def create_table(table_name: str) -> None:
