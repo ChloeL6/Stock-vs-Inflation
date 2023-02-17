@@ -8,3 +8,4 @@ stocks_file_names: ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','
 stocks: outputs/all_stocks.parquet
 m2: outputs/m2_supply.parquet
 gas: outputs/gas_prices.parquet
+
