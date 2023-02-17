@@ -21,7 +21,7 @@ with open(CONF_PATH) as open_yaml:
 data_fs = FSHook(conn_id='data_fs')     # get airflow connection for data_fs
 data_dir = data_fs.get_path()  
 
-#Initialize spark for ETL to parquet file
+#Initialize spark for ETL to parquet files
 #------------------------------------------------
 
 def stocks_transform():
@@ -60,8 +60,34 @@ def stocks_transform():
     #save consolidated df into parquet file
     df.to_parquet(os.path.join(data_dir,'all_stocks.parquet'))
 
+def m2_transform():
+    m2df = pd.read_csv(os.path.join(data_dir,f'FRB_H6.csv'),header=5)
+    m2df = m2df[['Time Period', 'M2_N.M']]
+    m2df = m2df.rename(columns={'Time Period': 'date_monthly', 'M2_N.M':'m2_supply'})
 
-#load stocks parquet file into BigQuery
+    m2df['date_monthly'] = pd.to_datetime(m2df['date_monthly'], format='%Y-%m')
+
+    m2df.insert(0,'month', m2df['date_monthly'].dt.month)
+    m2df.insert(0,'year', m2df['date_monthly'].dt.year)
+
+    m2df.to_parquet(os.path.join(data_dir,'m2_supply.parquet'))
+
+def gas_transform():
+    gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=0)
+    gdf = gdf[['Date', 'A1', 'R1', 'M1', 'P1']]
+    gdf = gdf.rename(columns={'Date': 'date', 'A1':'all_grade_prices', 'R1':'reg_grade_prices', 'M1':'mid_grade_prices', 'P1':'prem_grade_prices'})
+
+    gdf['date'] = pd.to_datetime(gdf['date'], format='%m/%d/%Y')
+
+    gdf.insert(0,'month', gdf['date'].dt.month)
+    gdf.insert(0,'year', gdf['date'].dt.year)
+
+    gdf = gdf.groupby(['date','year','month']).agg({'all_grade_prices': 'mean', 'reg_grade_prices': 'mean', 'mid_grade_prices': 'mean', 'prem_grade_prices': 'mean'})
+    gdf = gdf.reset_index()
+
+    gdf.to_parquet(os.path.join(data_dir,'gas_prices.parquet'))
+
+#Create project info and table schemas for load into BigQuery
 #------------------------------------------------
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
@@ -99,14 +125,16 @@ M2_TABLE_SCHEMA = [
 
 GAS_TABLE_SCHEMA = [
     bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
-    bigquery.SchemaField('year', 'DATE', mode='NULLABLE'),
-    bigquery.SchemaField('month', 'DATE', mode='NULLABLE'),
+    bigquery.SchemaField('year', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('month', 'INTEGER', mode='NULLABLE'),
     bigquery.SchemaField('all_grade_prices', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('reg_grade_prices', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('mid_grade_prices', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('prem_grade_prices', 'FLOAT', mode='NULLABLE'),
     ]
 
+#function to create dataset in BigQuery
+#------------------------------------------------
 def create_dataset():
     if client.get_dataset(dataset_id) == NotFound:
         dataset = bigquery.Dataset(dataset_id)
@@ -115,6 +143,8 @@ def create_dataset():
     else:
         pass
 
+#functions to create and load tables in BigQuery
+#------------------------------------------------
 def create_stocks_table():
     job_config = bigquery.LoadJobConfig(
             source_format=bigquery.SourceFormat.PARQUET,
@@ -131,18 +161,6 @@ def create_stocks_table():
 
     job.result()
 
-def m2_transform():
-    m2df = pd.read_csv(os.path.join(data_dir,f'FRB_H6.csv'),header=5)
-    m2df = m2df[['Time Period', 'M2_N.M']]
-    m2df = m2df.rename(columns={'Time Period': 'date_monthly', 'M2_N.M':'m2_supply'})
-
-    m2df['date_monthly'] = pd.to_datetime(m2df['date_monthly'], format='%Y-%m')
-
-    m2df.insert(0,'month', m2df['date_monthly'].dt.month)
-    m2df.insert(0,'year', m2df['date_monthly'].dt.year)
-
-    m2df.to_parquet(os.path.join(data_dir,'m2_supply.parquet'))
-
 def create_m2_table():
     job_config = bigquery.LoadJobConfig(
             source_format=bigquery.SourceFormat.PARQUET,
@@ -158,21 +176,6 @@ def create_m2_table():
         job = client.load_table_from_file(source_file, m2_table_id, job_config=job_config)
 
     job.result()
-
-def gas_transform():
-    gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=0)
-    gdf = gdf[['Date', 'A1', 'R1', 'M1', 'P1']]
-    gdf = gdf.rename(columns={'Date': 'date', 'A1':'all_grade_prices', 'R1':'reg_grade_prices', 'M1':'mid_grade_prices', 'P1':'prem_grade_prices'})
-
-    gdf['date'] = pd.to_datetime(gdf['date'], format='%m/%d/%Y')
-
-    gdf.insert(0,'month', gdf['date'].dt.month)
-    gdf.insert(0,'year', gdf['date'].dt.year)
-
-    gdf = gdf.groupby(['date','year','month']).agg({'all_grade_prices': 'mean', 'reg_grade_prices': 'mean', 'mid_grade_prices': 'mean', 'prem_grade_prices': 'mean'})
-    gdf = gdf.reset_index()
-
-    gdf.to_parquet(os.path.join(data_dir,'gas_prices.parquet'))
 
 def create_gas_table():
     job_config = bigquery.LoadJobConfig(
