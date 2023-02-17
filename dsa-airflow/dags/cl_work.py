@@ -16,7 +16,7 @@ import time
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
-
+import google.auth
 
 
 cpi_file = 'US-CPI.csv'
@@ -25,7 +25,7 @@ unemp_file = 'USUnemployment.csv'
 cpi_complete = 'cpi.csv'
 unemp_complete = 'unemp.csv'
 
-DATA_DIR = '../data'
+DATA_DIR = '/data'
 
 # -------------------------------------------
 # Set up logging
@@ -73,29 +73,26 @@ with open(CONF_PATH) as open_yaml:
 # Setup the bigquery client
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
-KEY_PATH = config['cl_key_path']
 
-credentials = service_account.Credentials.from_service_account_file(KEY_PATH, 
-                                                              scopes=["https://www.googleapis.com/auth/cloud-platform"])
-_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
-
-# _client: bigquery.Client = None
-
-# def get_client() -> bigquery.Client:
-#     """
-#     returns a bigquery client to the current project
-#     Returns:
-#         bigquery.Client: bigquery client
-#     """
-#     # check to see if the client has not been initialized
-#     global _client
-#     if _client is None:
-#         # initialize the client
-#         credentials = service_account.Credentials.from_service_account_file(KEY_PATH, 
+# KEY_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# credentials = service_account.Credentials.from_service_account_file(KEY_PATH, 
 #                                                               scopes=["https://www.googleapis.com/auth/cloud-platform"])
-#         _client = bigquery.Client(credentials=credentials, project=credentials.project_id)
-#         logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
-#     return _client
+
+_client : bigquery.Client = None
+def get_client() -> bigquery.Client:
+    """
+    returns a bigquery client to the current project
+
+    Returns:
+        bigquery.Client: bigquery client
+    """
+    # check to see if the client has not been initialized
+    global _client
+    if _client is None:
+        # initialize the client
+        _client = bigquery.Client(project=PROJECT_NAME)
+        logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
+    return _client
 
 def check_bigquery_client():
     """
@@ -108,9 +105,9 @@ def check_bigquery_client():
         logger.warn("You most likely have not edited the docker-compose.yaml file correctly. You must restart docker-compose after doing so.")
     # client from dsa_utils.table_definitions module
     logger.info("checking bigquery client")
-    client = _client
+    client = get_client()
     location = client.location
-    logger.info(f"bigquery client is good. bigquery location: {location}")
+    logger.info(f"bigquery client is good. {location}")
 
 
 def cpi_transformation():
@@ -147,11 +144,26 @@ def unemp_transformation():
 #avg cpi table
 CPI_RATES =[
             bigquery.SchemaField("year", "INTEGER", mode="REQUIRED"),
-            bigquery.SchemaField("cpi", "FLOAT", mode="REQUIRED")]
+            bigquery.SchemaField("cpi", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("month", "INTEGER", mode="REQUIRED"),
+            bigquery.SchemaField("date", "INTEGER", mode="REQUIRED"),
+            bigquery.SchemaField("avg_cpi_per_year", "FLOAT", mode="REQUIRED"),]
 
 #avg unemployment table
 UNEMPLOYMENT_RATES = [
             bigquery.SchemaField("year", "INTEGER", mode="REQUIRED"),
+            bigquery.SchemaField("jan", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("feb", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("mar", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("apr", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("may", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("jun", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("jul", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("aug", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("sep", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("oct", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("nov", "FLOAT", mode="REQUIRED"),
+            bigquery.SchemaField("dec", "FLOAT", mode="REQUIRED"),
             bigquery.SchemaField("avg_unemp_per_year", "FLOAT", mode="REQUIRED")]
 
 # global dict to hold all tables schemas
@@ -164,7 +176,7 @@ TABLE_SCHEMAS = {
 def create_table(table_name: str) -> None:
     assert table_name in TABLE_SCHEMAS, f"Table schema not found for table name: {table_name}"
 
-    client = _client
+    client = get_client()
     table_id = f"{PROJECT_NAME}.{DATASET_NAME}.{table_name}"
 
     try:
@@ -196,7 +208,7 @@ def load_table(table_name: str):
     # make sure table_name is one of our data files
     assert table_name in DATA_FILES, f"Unknown table name: {table_name}"
     
-    client = _client
+    client = get_client()
     data_file = DATA_FILES[table_name]
 
     # check to see if data file exists
