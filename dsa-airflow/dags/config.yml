@@ -1,8 +1,6 @@
 project: team-week-3
 dataset: tech_stocks_world_events
 
-dataset: 'tech_stocks_world_events'
-
 #csv file names for extraction
 stocks_file_names: ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA', 'Bitcoin']
 
