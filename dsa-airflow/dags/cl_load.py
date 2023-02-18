@@ -1,16 +1,17 @@
 import os
 from datetime import timedelta, datetime
 from airflow.utils.dates import days_ago 
-import pandas as pd
 from airflow import DAG
 from airflow.decorators import dag,task
 from airflow.sensors.filesystem import FileSensor
-from airflow.hooks.filesystem import FSHook
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor
-from cl_work import check_bigquery_client, cpi_transformation, unemp_transformation, load_table, create_table
+from airflow.providers.google.cloud.operators.bigquery import BigQueryGetDatasetOperator
+from cl_work import check_bigquery_client, cpi_transformation, unemp_transformation, load_table, create_table, config
+
+
+PROJECT_NAME = config['project']
+DATASET_NAME = config['dataset']
 
 
 default_args = {
@@ -22,7 +23,7 @@ default_args = {
 
 # instantiate a DAG!
 with DAG(
-    'ETL_pipeline', 
+    'ETL_pipeline_process', 
     description='A DAG to do transformation once files are detected',
     default_args=default_args,
 ) as dag:
@@ -30,6 +31,13 @@ with DAG(
   check_bq_client = PythonOperator(
     task_id = "check_bq_client",
     python_callable=check_bigquery_client
+  )
+
+  get_bq_dataset = BigQueryGetDatasetOperator(
+     task_id="get_bq_dataset",
+     project_id=PROJECT_NAME,
+     dataset_id=DATASET_NAME,
+     gcp_conn_id='google_creds'
   )
 
   wait_for_files = FileSensor(
@@ -87,4 +95,4 @@ with DAG(
   # create empty task to branch back in
   done = DummyOperator(task_id='done')
 
-check_bq_client >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> t2 >> load_tasks >> done
+check_bq_client >> get_bq_dataset >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> t2 >> load_tasks >> done
