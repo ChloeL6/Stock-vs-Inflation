@@ -1,4 +1,3 @@
 project: team-week-3
-dataset: 'tech_stocks_world_events'
+dataset: tech_stocks_world_events
 key_path: "/Users/Ruben/Desktop/google_cred/.cred/team_project_3/team-week-3-2f1d10dceea4.json"
-cl_key_path: "/home/chloe_ycl/.creds/team-week-3.json"
