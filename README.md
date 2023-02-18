@@ -1,6 +1,6 @@
 # Tech Stocks
 
-#### By [Ruben Giosa](https://github.com/rgiosa10), [Chloe (Yen Chi) Le](https://github.com/ChloeL6), [Philip Kendal](https://github.com/philiprobertovich)
+#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://github.com/ChloeL6), [Philip Kendal](https://github.com/philiprobertovich)
 
 #### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Spark, Astro CLI, BigQuery and Looker Studio.
 
@@ -11,15 +11,12 @@
 * Python
 * Jupyter
 * Airflow
-* Astro CLI
-* Spark
 * BigQuery
 * Looker Studio
 * SQL
 * Pandas
 * Git
 * Markdown
-* NumPy
 * `.gitignore`
 * `requirements.txt`
   
@@ -28,27 +25,23 @@
 ## Datasets Used
 
 1. [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices)
+2. [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset)
+3. [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package)
 
 </br>
 
 ## Description
 
 
-
-#### Architectural diagram:
-
-
-<br>
-
-#### Data Model:
+[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
 
 <br>
 
-<br>
+#### DAGs of Data Pipeline:
 
-#### Data Pipeline:
-<img src="imgs/ETL_pipeline.png" alt="Architectural diagram" width="640"/>
+<img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
+
 
 <br>
 
@@ -61,38 +54,26 @@
 
 <br>
 
-[Ruben](https://github.com/rgiosa10) performed profiling, cleaning and transformations on the [World Energy Consumption](https://www.kaggle.com/datasets/pralabhpoudel/world-energy-consumption) to compile both the `fct_gdp` and `fct_consump` tables. Upon completion it was loaded to BigQuery. He also owned and authored the `README.md`.
+[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), and [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) datasets once they are detected in the data directory. Once the transformations are completed these are complied into two `Parquet` files. Upon completion these two files are loaded to as tables into BigQuery. He also owned and authored the `README.md`.
 
 <br>
 
 ### Visualizations:
-Once the datasets were cleaned and consolidated, the team created data visualizations and analysis (using Looker Studio) leveraging the constructed dimension and fact tables outlined above. 
+Once the datasets were cleaned and consolidated, the team created data visualizations and analysis (using Looker Studio).
 
-Below is a combo chart that was put together by Ruben that shows GDP compared to Population and Energy Consumption (click on image of chart to use dashboard):
+Below is a line graph that was put together by [Ruben](https://www.linkedin.com/in/rubengiosa/) that allows a user to look at the highest tech stock and Bitcoin prices by year (click on image of chart to use dashboard):
 
-[<img src="imgs/GDP_pop_con_Looker_graph.png">](https://datastudio.google.com/embed/reporting/dbe92c8b-ccd3-41d9-b269-5964eb9717c3/page/f94CD)
+[<img src="imgs/stocks_no_btc.png" alt="stocks no btc snapshot" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
-While Github disables iframe, which allows embedding of the report on markdown files, I have included the code below for users that clone the project. 
-
-```
-<iframe width="600" height="450" src="https://datastudio.google.com/embed/reporting/dbe92c8b-ccd3-41d9-b269-5964eb9717c3/page/f94CD" frameborder="0" style="border:0" allowfullscreen></iframe>
-```
-
-The scale of GDP (trillions of dollars), population (billions), and Energy consumption (thousands of terawatt-hours) posed an issue for the visualization, but by embedding this report the user is able to see the individual values for energy consumption which shows the consistent trend that population and energy consumption growth align with the growth of GDP. The chart is dynamic in that it allows users to filter for country and timeframe. Also the timeframe of 1965 through 2016 was chosen as consumption data prior to 1965 was missing and GDP data goes up to 2016.
+The chart is dynamic in that it allows users to filter for specific months of each year and specific stock/bitcoin combinations.
 
 <br>
 
-Below is a line chart by Ruben that shows total global energy consumption compared to CO2 emissions (click on image of chart to use dashboard):
+Below is a line chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual [M2 Money supply](https://en.wikipedia.org/wiki/Money_supply#:~:text=M2%20is%20a%20broader%20classification,large%20and%20long%2Dterm%20deposits.) (click on image of chart to use dashboard):
 
 [<img src="imgs/Con_Em_Looker_graph.png">](https://datastudio.google.com/embed/reporting/dbe92c8b-ccd3-41d9-b269-5964eb9717c3/page/f94CD)
 
-As called out above Github disables iframe, but I have included the code below for reference:
-
-```
-<iframe width="600" height="450" src="https://datastudio.google.com/embed/reporting/b7d972c6-7faf-4c78-948c-614945f42350/page/Io6CD" frameborder="0" style="border:0" allowfullscreen></iframe>
-```
-
-The chart leverages different scales for the left and right y-axis to better show the correlation between emissions and energy consumption over time (1965 - 2019). The chart is dynamic in that it allows users to filter for country and timeframe.
+The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin.
 
 <br>
 
@@ -104,7 +85,7 @@ Chloe put together two line graphs that 1) plots the global CO2 emissions over t
 
 <br>
 
-Overall, the team was able to limit the amount of merge conflicts by working on independent notebooks and assigning different tasks (e.g. Each focused on constructing specific dimension and fact tables, etc.). One challenge we came across was setting up a BigQuery project and granting access to each user, this was a great learning experience for the team as we set up Service Accounts with authorization keys for each user. 
+Overall, the team was able to limit the amount of merge conflicts by working on independent notebooks and assigning different tasks (e.g. Each focused on constructing specific DAGs and python files, etc.). One challenge we came across was setting up a BigQuery project and granting access to each user, this was a great learning experience for the team as we set up Service Accounts with authorization keys for each user. 
 
 ## Setup/Installation Requirements
 

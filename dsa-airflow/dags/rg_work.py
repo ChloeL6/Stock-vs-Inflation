@@ -6,96 +6,107 @@ from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
 import yaml
 import os
+from datetime import datetime
 
-import pyspark
-from pyspark.sql import SparkSession
-import pyspark.sql.functions as sf      # sf = spark functions
-import pyspark.sql.types as st          # st = spark types
 
 #SETUP config and FileSensor data dir path
 #------------------------------------------------
-_default_config_path = './config.yml'
+
+_default_config_path = '/opt/airflow/dags/config.yml'
 CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
 config: dict = {}
 with open(CONF_PATH) as open_yaml:
     config: dict =  yaml.full_load(open_yaml)
     
 data_fs = FSHook(conn_id='data_fs')     # get airflow connection for data_fs
-DATA_DIR = data_fs.get_path()  
+data_dir = data_fs.get_path()  
 
-
-#Initialize spark for ETL to parquet file
+#Initialize spark for ETL to parquet files
 #------------------------------------------------
-sparkql = pyspark.sql.SparkSession.builder.master('local').getOrCreate()
+def stocks_transform():
+    file_names = config['stocks_file_names']
 
-data_dir = '../data'
+    #renaming the columns   
+    old_names = ['Date','Open','High','Low','Close','Adj Close','Volume']
+    new_names = ['date', 'open', 'high', 'low', 'close', 'adj_close', 'volume']
+    rename_dict = {item[0]:item[1] for item in zip(old_names,new_names)}
 
-file_names = ['ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA'] #excluded AAPL to start df
+    #empty list to get all dataframes for concat
+    li = []
 
-columns = 'stock_name string, date string, open float, high float, low float, close float, adj_close float, volume int' #schema to use
+    #extract and transform all of the files 
+    for file in file_names:
+        idf = pd.read_csv(os.path.join(data_dir,f'{file}.csv'),header=0)
+        #rename the columns
+        idf = idf.rename(columns=rename_dict)
+        #insert column with the stock name
+        idf['date'] = pd.to_datetime(idf['date'], format='%Y-%m-%d')
 
-df = sparkql.read.csv(os.path.join(data_dir,'AAPL.csv'), header=True)
-df = df.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume') #rename the columns
-df = df.withColumn('stock_name', sf.lit('AAPL')) #add column with stock name
+        idf.insert(0,'day', idf['date'].dt.day)
+        idf.insert(0,'month', idf['date'].dt.month)
+        idf.insert(0,'year', idf['date'].dt.year)
+        
+        idf.insert(0,'stock_name', file)
+        #insert column with composite key
+        idf.insert(0,'sd_id', idf['stock_name']+idf['date'].astype(str))
 
-#create composite key
-df.createOrReplaceTempView("key") 
-df = sparkql.sql("SELECT CONCAT(stock_name, date) AS sd_id, stock_name, date, open, high, low, close, adj_close, volume FROM key")
-df = df.select('sd_id','stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume')
+        li.append(idf)
 
-#create df for each csv, transform it and then consolidate into one dataframe
-for csv in file_names:
-    idf = sparkql.read.csv(os.path.join(data_dir,csv+'.csv'), header=True)
-    idf = idf.toDF('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume') #rename the columns
-    idf = idf.withColumn('stock_name', sf.lit(csv)) #add column with stock name
+    #consolidate all files into one
+    df = pd.concat(li, axis=0)
+    #set index to composite key
+    df.set_index('sd_id', inplace=True)
+    #save consolidated df into parquet file
+    df.to_parquet(os.path.join(data_dir,config['stocks']))
 
-    #create composite key
-    idf.createOrReplaceTempView("key") 
-    idf = sparkql.sql("SELECT CONCAT(stock_name, date) AS sd_id, stock_name, date, open, high, low, close, adj_close, volume FROM key")
-    idf = idf.select('sd_id','stock_name', 'date', 'open', 'high', 'low', 'close', 'adj_close', 'volume')
-    
-    #concat to df
-    df = df.union(idf)
+def m2_transform():
+    m2df = pd.read_csv(os.path.join(data_dir,f'FRB_H6.csv'),header=5)
+    m2df = m2df[['Time Period', 'M2_N.M']]
+    m2df = m2df.rename(columns={'Time Period': 'date_monthly', 'M2_N.M':'m2_supply'})
 
-# Write to parquet file. Used coalesce in order to have one parquet file
-df.coalesce(1).write.format("parquet").save(os.path.join(data_dir,'all_tech_stocks.parquet'))
+    m2df['date_monthly'] = pd.to_datetime(m2df['date_monthly'], format='%Y-%m')
 
-#load stocks parquet file into BigQuery
+    m2df.insert(0,'month', m2df['date_monthly'].dt.month)
+    m2df.insert(0,'year', m2df['date_monthly'].dt.year)
+
+    m2df.to_parquet(os.path.join(data_dir,config['m2']))
+
+def gas_transform():
+    gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=0)
+    gdf = gdf[['Date', 'A1', 'R1', 'M1', 'P1']]
+    gdf = gdf.rename(columns={'Date': 'date', 'A1':'all_grade_prices', 'R1':'reg_grade_prices', 'M1':'mid_grade_prices', 'P1':'prem_grade_prices'})
+
+    gdf['date'] = pd.to_datetime(gdf['date'], format='%m/%d/%Y')
+
+    gdf.insert(0,'month', gdf['date'].dt.month)
+    gdf.insert(0,'year', gdf['date'].dt.year)
+
+    gdf = gdf.groupby(['date','year','month']).agg({'all_grade_prices': 'mean', 'reg_grade_prices': 'mean', 'mid_grade_prices': 'mean', 'prem_grade_prices': 'mean'})
+    gdf = gdf.reset_index()
+
+    gdf.to_parquet(os.path.join(data_dir,config['gas']))
+
+#Create project info and table schemas for load into BigQuery
 #------------------------------------------------
-
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
 
-key_path = config['key_path']
-
-credentials = service_account.Credentials.from_service_account_file(
-    key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"],
-)
-
 #create bigquery client
-client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+client = bigquery.Client()
 
 #create dataset_id and table_ids
 dataset_id = f"{PROJECT_NAME}.{DATASET_NAME}"
-table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
+stocks_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
+m2_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.m2_supply"
+g_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.gas_prices"
 
-data_dir = '../data/all_tech_stocks.parquet'
-
-#rename the parquet file in order to load to BigQuery
-parq = '.snappy.parquet'
-crc = '.crc'
-for file_name in os.listdir(data_dir):
-    source = data_dir + file_name
-    if parq in source and crc not in source:
-        os.rename(os.path.join(data_dir,file_name),os.path.join(data_dir,'stocks.parquet'))
-    
-#filepath to get loaded to BigQuery
-DATA_FILE = os.path.join(data_dir,'stocks.parquet')
-
-TABLE_SCHEMA = [
+STOCKS_TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('stock_name', 'STRING', mode='NULLABLE'),
     bigquery.SchemaField('date', 'DATE', mode='NULLABLE'),
+    bigquery.SchemaField('year', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('month', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('day', 'INTEGER', mode='NULLABLE'),
     bigquery.SchemaField('open', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('high', 'FLOAT', mode='NULLABLE'),
     bigquery.SchemaField('low', 'FLOAT', mode='NULLABLE'),
@@ -104,6 +115,25 @@ TABLE_SCHEMA = [
     bigquery.SchemaField('volume', 'INTEGER', mode='NULLABLE'),
     ]
 
+M2_TABLE_SCHEMA = [
+    bigquery.SchemaField('date_monthly', 'DATE', mode='REQUIRED'),
+    bigquery.SchemaField('year', 'INTEGER', mode='REQUIRED'),
+    bigquery.SchemaField('month', 'INTEGER', mode='REQUIRED'),
+    bigquery.SchemaField('m2_supply', 'FLOAT', mode='NULLABLE'),
+    ]
+
+GAS_TABLE_SCHEMA = [
+    bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
+    bigquery.SchemaField('year', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('month', 'INTEGER', mode='NULLABLE'),
+    bigquery.SchemaField('all_grade_prices', 'FLOAT', mode='NULLABLE'),
+    bigquery.SchemaField('reg_grade_prices', 'FLOAT', mode='NULLABLE'),
+    bigquery.SchemaField('mid_grade_prices', 'FLOAT', mode='NULLABLE'),
+    bigquery.SchemaField('prem_grade_prices', 'FLOAT', mode='NULLABLE'),
+    ]
+
+#function to create dataset in BigQuery
+#------------------------------------------------
 def create_dataset():
     if client.get_dataset(dataset_id) == NotFound:
         dataset = bigquery.Dataset(dataset_id)
@@ -112,6 +142,8 @@ def create_dataset():
     else:
         pass
 
+#functions to create and load tables in BigQuery
+#------------------------------------------------
 def create_stocks_table():
     job_config = bigquery.LoadJobConfig(
             source_format=bigquery.SourceFormat.PARQUET,
@@ -120,13 +152,42 @@ def create_stocks_table():
             write_disposition='WRITE_TRUNCATE',
             ignore_unknown_values=True,
         )
-    table = bigquery.Table(table_id, schema=TABLE_SCHEMA)
+    table = bigquery.Table(stocks_table_id, schema=STOCKS_TABLE_SCHEMA)
     table = client.create_table(table, exists_ok=True)
 
-    with open(DATA_FILE, "rb") as source_file:
-        job = client.load_table_from_file(source_file, table_id, job_config=job_config)
+    with open(os.path.join(data_dir, config['stocks']), "rb") as source_file:
+        job = client.load_table_from_file(source_file, stocks_table_id, job_config=job_config)
 
     job.result()
 
-create_dataset()
-create_stocks_table()
+def create_m2_table():
+    job_config = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.PARQUET,
+            autodetect=True,
+            create_disposition='CREATE_NEVER',
+            write_disposition='WRITE_TRUNCATE',
+            ignore_unknown_values=True,
+        )
+    table = bigquery.Table(m2_table_id, schema=M2_TABLE_SCHEMA)
+    table = client.create_table(table, exists_ok=True)
+
+    with open(os.path.join(data_dir, config['m2']), "rb") as source_file:
+        job = client.load_table_from_file(source_file, m2_table_id, job_config=job_config)
+
+    job.result()
+
+def create_gas_table():
+    job_config = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.PARQUET,
+            autodetect=True,
+            create_disposition='CREATE_NEVER',
+            write_disposition='WRITE_TRUNCATE',
+            ignore_unknown_values=True,
+        )
+    table = bigquery.Table(g_table_id, schema=GAS_TABLE_SCHEMA)
+    table = client.create_table(table, exists_ok=True)
+
+    with open(os.path.join(data_dir, config['gas']), "rb") as source_file:
+        job = client.load_table_from_file(source_file, g_table_id, job_config=job_config)
+
+    job.result()
