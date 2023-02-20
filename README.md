@@ -76,15 +76,15 @@ The chart leverages the log scale to better show the correlation between stock/b
 
 <br>
 
-[Chloe](https://www.linkedin.com/in/chloeycl/) creates a line chart that shows the correlation between unemployment rates and CPI rates(Consumer Price Index) over the year. (click on image of chart to use dashboard):
+[Chloe](https://www.linkedin.com/in/chloeycl/) creates a line chart that shows the correlation between unemployment rates and CPI rates(Consumer Price Index) over the year. (click on image of chart to use dashboard for both graphs below):
 
 [<img src="imgs/cl_cpi.png" alt="unemployment and cpi rates" width="640"/>](https://lookerstudio.google.com/s/r66wu-F_ZH4)
 
 <br>
 
-She also creates a stacked combo chart that shows the average of open, close, high and low of Tech companies' stock in 2022. (click on image of chart to use dashboard):
+She also creates a stacked combo chart that shows the average of open, close, high and low of Tech companies' stock in 2022.
 
-[<img src="imgs/cl_graph_Stocks.png" alt="prices for tech stocks" width="640"/>](https://lookerstudio.google.com/s/r66wu-F_ZH4)
+[<img src="imgs/cl_graph_stocks.png" alt="prices for tech stocks" width="640"/>]
 
 <br>
 
