@@ -1,6 +1,8 @@
 project: team-week-3
 dataset: tech_stocks_world_events
 
+# Ruben's data files 
+#------------------------------------------------------------------
 #RG csv file names for extraction
 stocks_file_names: ['AAPL','ADBE','AMZN', 'CRM', 'CSCO', 'GOOGL', 'IBM','INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA', 'Bitcoin']
 
