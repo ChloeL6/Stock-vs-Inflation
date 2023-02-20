@@ -68,6 +68,14 @@ The chart leverages different scales for the left and right y-axis to better sho
 
 <br>
 
+Below is a line graph by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual petroleum gas price. (click on image of chart to use dashboard):
+
+[<img src="imgs/stocks_bitcoin_gas.png" alt="stocks and gas prices" width="640"/>](https://lookerstudio.google.com/reporting/d908aa95-fbc2-49df-8fbc-003aae1fd5df)
+
+The chart leverages the log scale to better show the correlation between stock/bitcoin prices and gas prices over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows that there is not a immediate correlation between tech stocks and Bitcoin with gas prices. Yet it does not rule out that there are broader impacts to stocks resulting from gas prices based on impacts to discretionary spending.
+
+<br>
+
 [Chloe](https://www.linkedin.com/in/chloeycl/) put together two line graphs that 1) plots the global CO2 emissions over time with total emissions and each type of emission producer and 2) total consumption compared to renewable consumption (click on the image of either chart to use dashboard): 
 
 
