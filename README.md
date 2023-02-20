@@ -53,7 +53,7 @@
 ### Visualizations:
 Once the datasets were cleaned and consolidated, the team created data visualizations and analysis (using Looker Studio).
 
-Below is a line graph that was put together by [Ruben](https://www.linkedin.com/in/rubengiosa/) that allows a user to look at the highest tech stock and Bitcoin prices by year (click on image of chart to use dashboard):
+Below is a line graph that was put together by [Ruben](https://www.linkedin.com/in/rubengiosa/) that allows a user to look at the highest tech stock and Bitcoin prices by year (click on image of chart to use dashboard), which leverages the data from the `stocks` table:
 
 <br>
 
@@ -69,7 +69,28 @@ Below is a combo chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that 
 
 [<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="750"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
-The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows the correlation that as additional money is created it leads to the increase in valuation prices of assets such as stocks and bitcoin.
+The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows the correlation that as additional money is created it leads to the increase in valuation prices of assets such as stocks and bitcoin. For the above visual a `Custom Query` was leveraged to pull it from BigQuery to combined the datasets for use in Looker:
+
+
+```sql
+with stocks as (
+  Select CONCAT(year, month) as ym, year, month, stock_name, (avg(open) + avg(high) + avg(low) + avg(close))/4 as avg_price
+  from `team-week-3.tech_stocks_world_events.stocks`
+  Group BY ym, stock_name, year, month),
+
+m2 as (
+  Select CONCAT(year, month) as ym, m2_supply
+  from `team-week-3.tech_stocks_world_events.m2_supply`
+  Group BY ym, m2_supply),
+
+combined as (SELECT stocks.ym, stocks.year, stocks.month, stocks.stock_name, stocks.avg_price, m2.m2_supply
+from stocks
+INNER JOIN m2
+ON stocks.ym = m2.ym)
+
+SELECT year, month, stock_name, avg_price, m2_supply
+FROM combined;
+```
 
 <br>
 
@@ -81,7 +102,7 @@ Below is a line graph by [Ruben](https://www.linkedin.com/in/rubengiosa/) that s
 
 The chart leverages the log scale to better show the correlation between stock/bitcoin prices and gas prices over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows that there is not a immediate correlation between tech stocks and Bitcoin with gas prices. Yet it does not rule out that there are broader impacts to stocks resulting from gas prices based on impacts to discretionary spending.
 
-I also performed a Custom Query in BigQuery to combined the datasets, and leveraged this code below:
+For the above visual a `Custom Query` was leveraged to pull it from BigQuery to combined the datasets for use in Looker:
 ```sql
 with stocks as (
   Select CONCAT(year, month) as ym, year, month, stock_name, (avg(open) + avg(high) + avg(low) + avg(close))/4 as avg_price
