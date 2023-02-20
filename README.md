@@ -1,8 +1,8 @@
 # Tech Stocks
 
-#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://github.com/ChloeL6), [Philip Kendal](https://github.com/philiprobertovich)
+#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://github.com/philiprobertovich)
 
-#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Spark, Astro CLI, BigQuery and Looker Studio.
+#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio.
 
 <br>
 
@@ -27,34 +27,25 @@
 1. [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices)
 2. [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset)
 3. [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package)
+4. [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021)
+5. [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present)
+6. [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)
 
 </br>
 
 ## Description
 
+[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) and [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021) datasets once they are detected in the data directory. Once the transformations are completed these are complied into three `Parquet` files. Upon completion, the dataset is created in BigQuery and then the stocks and the M2 Supply files are loaded as tables. A `BigQueryTableExistenceSensor` is then used to ensure that the `m2_supply` table is loaded, which then kicks-off the final step of the loading of the `gas` table to BigQuery. He also owned and authored the `README.md`.
 
-[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
-
-
-<br>
-
-#### DAGs of Data Pipeline:
-
+Below is the DAG of the above pipeline:
 <img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
 
-
 <br>
 
-### ETL Construction:
+[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery.
 
-
-<br>
-
-[Chloe](https://github.com/ChloeL6) worked on profiling, cleaning and transformations for the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices) data set create the `fct_emissions` table. Upon completion it was loaded to BigQuery.
-
-<br>
-
-[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), and [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) datasets once they are detected in the data directory. Once the transformations are completed these are complied into two `Parquet` files. Upon completion these two files are loaded to as tables into BigQuery. He also owned and authored the `README.md`.
+Below is the DAG of the above pipeline:
+<img src="imgs/tw3_DAG.png" alt="Airflow dag" width="680"/>
 
 <br>
 
@@ -69,19 +60,16 @@ The chart is dynamic in that it allows users to filter for specific months of ea
 
 <br>
 
-Below is a line chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual [M2 Money supply](https://en.wikipedia.org/wiki/Money_supply#:~:text=M2%20is%20a%20broader%20classification,large%20and%20long%2Dterm%20deposits.) (click on image of chart to use dashboard):
+Below is a combo chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual [M2 Money supply](https://en.wikipedia.org/wiki/Money_supply#:~:text=M2%20is%20a%20broader%20classification,large%20and%20long%2Dterm%20deposits.) (click on image of chart to use dashboard):
 
-[<img src="imgs/Con_Em_Looker_graph.png">](https://datastudio.google.com/embed/reporting/dbe92c8b-ccd3-41d9-b269-5964eb9717c3/page/f94CD)
+[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
-The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin.
+The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows the correlation that as additional money is created it leads to the increase in valuation prices of assets such as stocks and bitcoin.
 
 <br>
 
-Chloe put together two line graphs that 1) plots the global CO2 emissions over time with total emissions and each type of emission producer and 2) total consumption compared to renewable consumption (click on the image of either chart to use dashboard): 
- 
-[<img src="imgs/cl_global_CO2_emissions.png">](https://datastudio.google.com/embed/reporting/8a085df7-5101-4878-8c2c-8c6230de60d2/page/p_rh0ezxzj2c)
+[Chloe](https://www.linkedin.com/in/chloeycl/) put together two line graphs that 1) plots the global CO2 emissions over time with total emissions and each type of emission producer and 2) total consumption compared to renewable consumption (click on the image of either chart to use dashboard): 
 
-[<img src="imgs/cl_total_consump_vs_renewable.png">](https://datastudio.google.com/embed/reporting/8a085df7-5101-4878-8c2c-8c6230de60d2/page/p_rh0ezxzj2c)
 
 <br>
 
@@ -120,6 +108,87 @@ Overall, the team was able to limit the amount of merge conflicts by working on 
   code .
   ```
 * Upon launch please update the Google Cloud client and project details to configure it to load to your project
+
+* Once VS Code is open, then run the setup file:
+  ```bash
+  ./setup.sh
+  ```
+
+    The contents of the `setup.sh` include the below to install 1) relevant version of python 2) create virtual env 3) installing Airflow in virtual env and 4) requirements.txt:
+    ```bash
+    #/bin/bash
+    # this script will setup the environment and install all necessary components 
+
+    # install/upgrade virtualenv
+    python3.7 -m pip install --upgrade virtualenv
+
+    # create and run a python3.7 virtual env
+    python3.7 -m venv venv
+    source venv/bin/activate
+    # install/upgrade pip
+    python3.7 -m pip install --upgrade pip setuptools wheel
+
+    # install Airflow in the virtual env
+    AIRFLOW_VERSION=2.3.2
+    PYTHON_VERSION=3.7
+    CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+    pip install "apache-airflow[async,postgres,google]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+
+    # pip install pypi packages
+    pip install -r requirements.txt
+    ```
+
+* Then run the airflow setup file:
+
+  ```bash
+  ./airflow_setup.sh
+  ```
+    
+    The contents of the `airflow_setup.sh` include the below to 1) creating ./logs and ./plugins directories in the dsa-airflow directory 2) download the `docker_compose.yaml` 3) create the .env and 4) initialize airflow
+    
+```bash
+    #!/bin/bash
+    # Move into the dsa-airflow directory and make subdirs
+    cd dsa-airflow
+
+    # download the docker-compose.yaml and set the .env
+    curl -LfO 'https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml'
+    echo "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
+
+
+    # initialize airflow 
+    docker-compose up airflow-init
+```
+
+* Once airflow has been initialized, use the below command line tool that allows you to initialize the rest of the Docker containers:
+        ```bash
+        docker-compose up
+        ```
+
+* You will need to create a file connection for the `data/` folder. To do so go to the airflow GUI and click Admin -> Connections and then create a new connection with the below config and click save:
+
+    <img src="imgs/conn_setup.png" alt="connection setup" width="640"/>
+
+
+* You will need to create a cloud connection for the `BigQueryTableExistenceSensor` folder to work.
+
+* Once this is all setup, in the Airflow GUI 1) enable your DAG and 2) trigger it to run. From there go to your VS Code and run the below command from inside the data directory:
+
+    ```bash
+    ./get_data.sh
+    ```
+This will download the CSV file to your local filesystem in the data folder, which will trigger the file sensor and start the DAG.
+
+* Once setups have been completed, you will want to be using the below commands to manage airflow and docker:
+    
+    1. In order to shut down hit `^Ctrl C` to stop Airflow on the local host and then run the below to stop the containers and remove old volumes:
+        ```bash
+        docker-compose down --volumes --remove-orphans 
+        ```
+    2. Use the below command line tool if you want to re-initialize the rest of the Docker containers:
+        ```bash
+        docker-compose up
+        ```
 
 </br>
 
