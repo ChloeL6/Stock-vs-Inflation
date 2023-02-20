@@ -2,7 +2,7 @@
 
 #### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://github.com/ChloeL6), [Philip Kendal](https://github.com/philiprobertovich)
 
-#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Spark, Astro CLI, BigQuery and Looker Studio.
+#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio.
 
 <br>
 
@@ -35,33 +35,17 @@
 
 ## Description
 
-
-[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
-
-
-<br>
-
-#### DAGs of Data Pipeline:
-
-<img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
-
-
-<br>
-
-### ETL Construction:
-
-
-<br>
-
 [Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) and [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021) datasets once they are detected in the data directory. Once the transformations are completed these are complied into three `Parquet` files. Upon completion the stocks and the M2 Supply files are loaded as tables into BigQuery. A `BigQueryTableExistenceSensor` is then used to ensure that the `m2_supply` table is loaded, which then kicks-off the final step of the loading of the `gas` table to BigQuery. He also owned and authored the `README.md`.
+
+Below is the DAG of the above pipeline:
+<img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
 
 <br>
 
 [Chloe](https://github.com/ChloeL6) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the X table, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery.
 
-<br>
-
-
+Below is the DAG of the above pipeline:
+<img src="imgs/tw3_DAG.png" alt="Airflow dag" width="680"/>
 
 <br>
 
@@ -76,11 +60,11 @@ The chart is dynamic in that it allows users to filter for specific months of ea
 
 <br>
 
-Below is a line chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual [M2 Money supply](https://en.wikipedia.org/wiki/Money_supply#:~:text=M2%20is%20a%20broader%20classification,large%20and%20long%2Dterm%20deposits.) (click on image of chart to use dashboard):
+Below is a combo chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual [M2 Money supply](https://en.wikipedia.org/wiki/Money_supply#:~:text=M2%20is%20a%20broader%20classification,large%20and%20long%2Dterm%20deposits.) (click on image of chart to use dashboard):
 
-[<img src="imgs/Con_Em_Looker_graph.png">](https://datastudio.google.com/embed/reporting/dbe92c8b-ccd3-41d9-b269-5964eb9717c3/page/f94CD)
+[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
-The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin.
+The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows the correlation that as additional money is created it leads to the increase in valuation prices of assets such as stocks and bitcoin.
 
 <br>
 
