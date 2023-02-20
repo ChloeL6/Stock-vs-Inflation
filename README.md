@@ -35,26 +35,29 @@
 
 ## Description
 
-[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) and [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021) datasets once they are detected in the data directory. Once the transformations are completed these are complied into three `Parquet` files. Upon completion, the dataset is created in BigQuery and then the stocks and the M2 Supply files are loaded as tables. A `BigQueryTableExistenceSensor` is then used to ensure that the `m2_supply` table is loaded, which then kicks-off the final step of the loading of the `gas` table to BigQuery. He also owned and authored the `README.md`.
+[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) and [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021) datasets once they are detected in the data directory. Once the transformations are completed these are complied into three `Parquet` files. Upon completion, the dataset is created in BigQuery and then the stocks and the M2 Supply files are loaded as tables. A `BigQueryTableExistenceSensor` is then used to ensure that the `m2_supply` table is loaded, which then kicks-off the final step of the loading of the `gas` table to BigQuery. He also owned and authored the `README.md`. Below is the DAG of the above pipeline:
 
-Below is the DAG of the above pipeline:
-<img src="imgs/rg_dag.png" alt="Airflow dag" width="680"/>
+<br>
+<img src="imgs/rg_dag.png" alt="Airflow dag" width="750"/>
+
+
+
+[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery. Below is the DAG of the above pipeline:
 
 <br>
 
-[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery.
-
-Below is the DAG of the above pipeline:
-<img src="imgs/tw3_DAG.png" alt="Airflow dag" width="680"/>
+<img src="imgs/tw3_DAG.png" alt="Airflow dag" width="750"/>
 
 <br>
 
 ### Visualizations:
 Once the datasets were cleaned and consolidated, the team created data visualizations and analysis (using Looker Studio).
 
-Below is a line graph that was put together by [Ruben](https://www.linkedin.com/in/rubengiosa/) that allows a user to look at the highest tech stock and Bitcoin prices by year (click on image of chart to use dashboard):
+Below is a line graph that was put together by [Ruben](https://www.linkedin.com/in/rubengiosa/) that allows a user to look at the highest tech stock and Bitcoin prices by year (click on image of chart to use dashboard), which leverages the data from the `stocks` table:
 
-[<img src="imgs/stocks_no_btc.png" alt="stocks no btc snapshot" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
+<br>
+
+[<img src="imgs/stocks_no_btc.png" alt="stocks no btc snapshot" width="750"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
 
 The chart is dynamic in that it allows users to filter for specific months of each year and specific stock/bitcoin combinations.
 
@@ -62,17 +65,63 @@ The chart is dynamic in that it allows users to filter for specific months of ea
 
 Below is a combo chart by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual [M2 Money supply](https://en.wikipedia.org/wiki/Money_supply#:~:text=M2%20is%20a%20broader%20classification,large%20and%20long%2Dterm%20deposits.) (click on image of chart to use dashboard):
 
-[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="640"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
+<br>
 
-The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows the correlation that as additional money is created it leads to the increase in valuation prices of assets such as stocks and bitcoin.
+[<img src="imgs/stocks_m2.png" alt="stocks and M2 Supply" width="750"/>](https://lookerstudio.google.com/reporting/5d9a4269-f35d-4b46-a6b3-54bcbbb990a1)
+
+The chart leverages different scales for the left and right y-axis to better show the correlation between stock/bitcoin prices and M2 money supply over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows the correlation that as additional money is created it leads to the increase in valuation prices of assets such as stocks and bitcoin. For the above visual a `Custom Query` was leveraged to pull it from BigQuery to combined the datasets for use in Looker:
+
+
+```sql
+with stocks as (
+  Select CONCAT(year, month) as ym, year, month, stock_name, (avg(open) + avg(high) + avg(low) + avg(close))/4 as avg_price
+  from `team-week-3.tech_stocks_world_events.stocks`
+  Group BY ym, stock_name, year, month),
+
+m2 as (
+  Select CONCAT(year, month) as ym, m2_supply
+  from `team-week-3.tech_stocks_world_events.m2_supply`
+  Group BY ym, m2_supply),
+
+combined as (SELECT stocks.ym, stocks.year, stocks.month, stocks.stock_name, stocks.avg_price, m2.m2_supply
+from stocks
+INNER JOIN m2
+ON stocks.ym = m2.ym)
+
+SELECT year, month, stock_name, avg_price, m2_supply
+FROM combined;
+```
 
 <br>
 
 Below is a line graph by [Ruben](https://www.linkedin.com/in/rubengiosa/) that shows the average tech stock and bitcoin price compared against average annual petroleum gas price. (click on image of chart to use dashboard):
 
-[<img src="imgs/stocks_bitcoin_gas.png" alt="stocks and gas prices" width="640"/>](https://lookerstudio.google.com/reporting/d908aa95-fbc2-49df-8fbc-003aae1fd5df)
+<br>
+
+[<img src="imgs/stocks_bitcoin_gas.png" alt="stocks and gas prices" width="750"/>](https://lookerstudio.google.com/reporting/d908aa95-fbc2-49df-8fbc-003aae1fd5df)
 
 The chart leverages the log scale to better show the correlation between stock/bitcoin prices and gas prices over time. The chart is dynamic in that it allows users to filter for months and specific stocks and/or bitcoin. Overall it shows that there is not a immediate correlation between tech stocks and Bitcoin with gas prices. Yet it does not rule out that there are broader impacts to stocks resulting from gas prices based on impacts to discretionary spending.
+
+For the above visual a `Custom Query` was leveraged to pull it from BigQuery to combined the datasets for use in Looker:
+```sql
+with stocks as (
+  Select CONCAT(year, month) as ym, year, month, stock_name, (avg(open) + avg(high) + avg(low) + avg(close))/4 as avg_price
+  from `team-week-3.tech_stocks_world_events.stocks`
+  Group BY ym, stock_name, year, month),
+
+gas as (
+  Select year, month, 'gas' as stock_name, avg(all_grade_prices) as avg_price
+  from `team-week-3.tech_stocks_world_events.gas_prices`
+  Group BY year, month),
+
+combined as (SELECT stocks.year, stocks.month, stocks.stock_name, stocks.avg_price FROM stocks
+UNION ALL
+SELECT gas.year, gas.month, gas.stock_name, gas.avg_price FROM gas)
+
+SELECT year, month, stock_name, avg_price
+FROM combined;
+```
+
 
 <br>
 
