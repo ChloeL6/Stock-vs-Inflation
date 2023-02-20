@@ -1,6 +1,6 @@
 # Tech Stocks
 
-#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://github.com/ChloeL6), [Philip Kendal](https://github.com/philiprobertovich)
+#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://github.com/philiprobertovich)
 
 #### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio.
 
@@ -42,7 +42,7 @@ Below is the DAG of the above pipeline:
 
 <br>
 
-[Chloe](https://github.com/ChloeL6) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery.
+[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery.
 
 Below is the DAG of the above pipeline:
 <img src="imgs/tw3_DAG.png" alt="Airflow dag" width="680"/>
@@ -68,7 +68,7 @@ The chart leverages different scales for the left and right y-axis to better sho
 
 <br>
 
-Chloe put together two line graphs that 1) plots the global CO2 emissions over time with total emissions and each type of emission producer and 2) total consumption compared to renewable consumption (click on the image of either chart to use dashboard): 
+[Chloe](https://www.linkedin.com/in/chloeycl/) put together two line graphs that 1) plots the global CO2 emissions over time with total emissions and each type of emission producer and 2) total consumption compared to renewable consumption (click on the image of either chart to use dashboard): 
 
 
 <br>
