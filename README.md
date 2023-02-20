@@ -83,6 +83,7 @@ The chart leverages the log scale to better show the correlation between stock/b
 <br>
 
 She also creates a stacked combo chart that shows the average of open, close, high and low of Tech companies' stock in 2022. (click on image of chart to use dashboard):
+
 [<img src="imgs/cl_graph_Stocks.png" alt="prices for tech stocks" width="640"/>](https://lookerstudio.google.com/s/r66wu-F_ZH4)
 
 <br>
