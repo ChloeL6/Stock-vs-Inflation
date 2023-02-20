@@ -83,7 +83,7 @@ The chart leverages the log scale to better show the correlation between stock/b
 <br>
 
 She also creates a stacked combo chart that shows the average of open, close, high and low of Tech companies' stock in 2022.
-
+[<img src="imgs/cl_graph_Stocks.png" alt="prices for tech stocks" width="640"/>][https://lookerstudio.google.com/s/r66wu-F_ZH4]
 
 Overall, the team was able to limit the amount of merge conflicts by working on independent notebooks and assigning different tasks (e.g. Each focused on constructing specific DAGs and python files, etc.). One challenge we came across was setting up a BigQuery project and granting access to each user, this was a great learning experience for the team as we set up Service Accounts with authorization keys for each user. 
 
