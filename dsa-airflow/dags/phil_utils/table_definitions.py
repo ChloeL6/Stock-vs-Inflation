@@ -66,10 +66,10 @@ TABLE_SCHEMAS = {
 def create_table(table_name: str) -> None:
     """
     Creates bigquery table. Table name must be one of the defined
-    table schemas: airports, airlines, routes, aircraft
+    table schemas: tornadoes
 
     Args:
-        table_name (str): one of the following table names: airports, airlines, routes, aircraft
+        table_name (str): one of the following table names: tornadoes
     """
     # raise an error if table name if not in one of our schemas
     assert table_name in TABLE_SCHEMAS, f"Table schema not found for table name: {table_name}"
