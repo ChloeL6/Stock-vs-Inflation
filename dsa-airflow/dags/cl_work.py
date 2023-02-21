@@ -214,7 +214,7 @@ def load_table(table_name: str):
     assert os.path.exists(data_file), f"Missing data file: {data_file}"
 
     # insert data into bigquery
-    table_id = f"{PROJECT_NAME}.{DATASET_NAME}.cpi_rates"
+    table_id = f"{PROJECT_NAME}.{DATASET_NAME}.{table_name}"
 
     # bigquery job config to load from a dataframe
     job_config = bigquery.LoadJobConfig(
@@ -235,4 +235,21 @@ def load_table(table_name: str):
     table = client.get_table(table_id)
     logger.info(f"inserted {table.num_rows} rows to {table_id}")
 
+# save stock table to local machine
+def save_table_from_bq():
 
+    client = get_client()
+
+    stocks = f""" SELECT * FROM {PROJECT_NAME}.{DATASET_NAME}.stocks """
+    result = client.query(stocks)
+    logger.info(f"querying stocks table from bq")
+
+    # read to dataframe
+    df = result.to_dataframe()
+    logger.info(f"successfully read stocks table to dataframe contains: {len(df)} rows")
+
+    # read to csv file
+    stock_file = 'stocks.csv'
+    df.to_csv(os.path.join(DATA_DIR, stock_file), header=True, index=False, mode='w')
+
+    print(f'successfully save stock df in {DATA_DIR}, and file name is {stock_file}')
