@@ -15,7 +15,7 @@ DATASET_NAME = config['dataset']
 _client: bigquery.Client = None
 
 
-def get_client() -> bigquery.Client:
+def get_client(credentials) -> bigquery.Client:
     """
     returns a bigquery client to the current project
 
@@ -26,7 +26,7 @@ def get_client() -> bigquery.Client:
     global _client
     if _client is None:
         # initialize the client
-        _client = bigquery.Client(project=PROJECT_NAME)
+        _client = bigquery.Client(project=PROJECT_NAME, credentials=credentials)
         logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
     return _client
 
