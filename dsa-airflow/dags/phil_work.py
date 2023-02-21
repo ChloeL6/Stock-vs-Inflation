@@ -14,7 +14,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
-from google.oauth2 import service_account
+# from google.oauth2 import service_account
 
 # local imports
 from phil_utils.utils import logger, config
@@ -53,7 +53,7 @@ def check_bigquery_client():
     if (google_app_creds is None) or (not os.path.exists(google_app_creds)):
         logger.warn("GOOGLE_APPLICATION_CREDENTIALS is not set properly!")
         logger.warn("You most likely have not edited the docker-compose.yaml file correctly. You must restart docker-compose after doing so.")
-    # client from dsa_utils.table_definitions module
+    # client from phil_utils.table_definitions module
     logger.info("checking bigquery client")
     client = get_client()
     location = client.location
