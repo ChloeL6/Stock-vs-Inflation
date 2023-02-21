@@ -125,8 +125,15 @@ FROM combined;
 
 <br>
 
-[Chloe](https://www.linkedin.com/in/chloeycl/) put together two line graphs that 1) plots the global CO2 emissions over time with total emissions and each type of emission producer and 2) total consumption compared to renewable consumption (click on the image of either chart to use dashboard): 
+[Chloe](https://www.linkedin.com/in/chloeycl/) creates a line chart that shows the correlation between unemployment rates and CPI rates(Consumer Price Index) over the year. (click on image of chart to use dashboard for both graphs below):
 
+[<img src="imgs/cl_cpi.png" alt="unemployment and cpi rates" width="640"/>](https://lookerstudio.google.com/s/r66wu-F_ZH4)
+
+<br>
+
+She also creates a stacked combo chart that shows the average of open, close, high and low of Tech companies' stock in 2022.
+
+<img src="imgs/cl_graph_stocks.png" alt="prices for tech stocks" width="640"/>
 
 <br>
 
