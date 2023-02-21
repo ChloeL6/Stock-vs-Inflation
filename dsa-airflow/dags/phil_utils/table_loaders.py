@@ -3,7 +3,7 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 
 # local module imports
-from phil_utils import logger, config, DATA_DIR
+from phil_utils.utils import logger, config, DATA_DIR
 
 
 # setup the bigquery client
