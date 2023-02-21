@@ -82,28 +82,28 @@ with DAG(
     outputs_dir_task = PythonOperator(
         task_id='create_outputs_dir',
         python_callable = create_data_outputs,
-        doc_md = create_data_outputs.__doc__        # adding function docstring as task doc
+        doc_md = create_data_outputs.__doc__        
     )
 
     #transformations for stock and bitcoin data
     stock_transf_task = PythonOperator(
         task_id='stock_transformations',
         python_callable = stocks_transform,
-        doc_md = stocks_transform.__doc__        # adding function docstring as task doc
+        doc_md = stocks_transform.__doc__        
     )
 
     #transformations for M2 money supply data
     m2_transf_task = PythonOperator(
         task_id='m2_transformations',
         python_callable = m2_transform,
-        doc_md = m2_transform.__doc__        # adding function docstring as task doc
+        doc_md = m2_transform.__doc__       
     )
 
     #transformations for gas prices data
     gas_transf_task = PythonOperator(
         task_id='gas_transformations',
         python_callable = gas_transform,
-        doc_md = gas_transform.__doc__        # adding function docstring as task doc
+        doc_md = gas_transform.__doc__        
     )
 
     #for readability that shows that each transformation creates parquet files
@@ -113,24 +113,24 @@ with DAG(
     t0 = PythonOperator(
         task_id='create_dataset',
         python_callable = create_dataset,
-        doc_md = create_dataset.__doc__        # adding function docstring as task doc
+        doc_md = create_dataset.__doc__        
     )
 
     #loads stocks and bitcoin table to BigQuery
     stocks_table_task = PythonOperator(
         task_id=f"load_stocks_bitcoin_table",
-        python_callable=create_stocks_table,               # call the dsa_utils.table_definitions.create_table
-        doc_md=create_stocks_table.__doc__                 # take function docstring
+        python_callable=create_stocks_table,               
+        doc_md=create_stocks_table.__doc__                 
     )
 
     #loads m2_supply table to BigQuery
     m2_table_task = PythonOperator(
         task_id=f"load_m2_supply_table",
-        python_callable=create_m2_table,               # call the dsa_utils.table_definitions.create_table
-        doc_md=create_m2_table.__doc__                 # take function docstring
+        python_callable=create_m2_table,    
+        doc_md=create_m2_table.__doc__     
     )
 
-    #checks BigQuery for the existance of the m2_supply table, if exists then proceeds to load gas table
+    #checks BigQuery for the existence of the m2_supply table, if exists then proceeds to load gas table
     bq_m2_check = BigQueryTableExistenceSensor(
         task_id="check_table_exists",
         project_id= config['project'],
@@ -141,8 +141,8 @@ with DAG(
     #loads gas prices table to BigQuery
     gas_table_task = PythonOperator(
         task_id=f"load_gas_supply_table",
-        python_callable=create_gas_table,               # call the dsa_utils.table_definitions.create_table
-        doc_md=create_gas_table.__doc__                 # take function docstring
+        python_callable=create_gas_table,   
+        doc_md=create_gas_table.__doc__       
     )
 
     #order of the tasks for the DAG
