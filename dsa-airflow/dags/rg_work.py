@@ -23,10 +23,12 @@ data_dir = data_fs.get_path()
 
 #Initialize spark for ETL to parquet files
 #------------------------------------------------
+
+#creates directory within the data directory for transformed parquet files
 def create_data_outputs():
     os.mkdir(os.path.join(data_dir,'outputs'))
 
-
+#transformations on stock and bitcoin data
 def stocks_transform():
     file_names = config['stocks_file_names']
 
@@ -63,6 +65,7 @@ def stocks_transform():
     #save consolidated df into parquet file
     df.to_parquet(os.path.join(data_dir,config['stocks']))
 
+#transformations on m2 supply data
 def m2_transform():
     m2df = pd.read_csv(os.path.join(data_dir,f'FRB_H6.csv'),header=5)
     m2df = m2df[['Time Period', 'M2_N.M']]
@@ -75,6 +78,7 @@ def m2_transform():
 
     m2df.to_parquet(os.path.join(data_dir,config['m2']))
 
+#transformations on gas prices data
 def gas_transform():
     gdf = pd.read_csv(os.path.join(data_dir, 'PET_PRI_GND_DCUS_NUS_W.csv'),header=0)
     gdf = gdf[['Date', 'A1', 'R1', 'M1', 'P1']]
@@ -104,6 +108,7 @@ stocks_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.stocks"
 m2_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.m2_supply"
 g_table_id = f"{PROJECT_NAME}.{DATASET_NAME}.gas_prices"
 
+#schemas for tables to be loaded
 STOCKS_TABLE_SCHEMA = [
     bigquery.SchemaField('sd_id', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('stock_name', 'STRING', mode='NULLABLE'),
