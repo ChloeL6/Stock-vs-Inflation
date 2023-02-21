@@ -15,7 +15,7 @@ DATASET_NAME = config['dataset']
 _client: bigquery.Client = None
 
 
-def get_client(credentials) -> bigquery.Client:
+def get_client() -> bigquery.Client:
     """
     returns a bigquery client to the current project
 
@@ -26,7 +26,7 @@ def get_client(credentials) -> bigquery.Client:
     global _client
     if _client is None:
         # initialize the client
-        _client = bigquery.Client(project=PROJECT_NAME, credentials=credentials)
+        _client = bigquery.Client(project=PROJECT_NAME)
         logger.info(f"successfully created bigquery client. project={PROJECT_NAME}")
     return _client
 
@@ -52,7 +52,7 @@ def load_table(table_name: str):
     # check to see if data file exists
     assert os.path.exists(data_file), f"Missing data file: {data_file}"
     # insert data into bigquery
-    table_id = f"{PROJECT_NAME}.{DATASET_NAME}.airports"
+    table_id = f"{PROJECT_NAME}.{DATASET_NAME}.{table_name}"
     # bigquery job config to load from a csv file
     job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.CSV,
