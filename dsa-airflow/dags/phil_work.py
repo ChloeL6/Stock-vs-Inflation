@@ -14,12 +14,19 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
+from google.oauth2 import service_account
 
 # local imports
 from phil_utils.utils import logger, config
 from phil_utils.table_definitions import create_table, get_client
 from phil_utils.table_loaders import load_table, DATA_FILES
 
+# BigQuery credentials for proejct
+key_path = "/home/philiprobertovich/.creds/team-week-3.json"
+
+CREDENTIALS = service_account.Credentials.from_service_account_file(
+    key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+)
 
 # Pre-check tasks
 # -----------------------------------------
@@ -37,7 +44,7 @@ def check_data_files():
             raise FileNotFoundError(msg)
 
 
-def check_bigquery_client():
+def check_bigquery_client(CREDENTIALS):
     """
     task to see if we can successfully create a bigquery client
     """
@@ -48,7 +55,7 @@ def check_bigquery_client():
         logger.warn("You most likely have not edited the docker-compose.yaml file correctly. You must restart docker-compose after doing so.")
     # client from dsa_utils.table_definitions module
     logger.info("checking bigquery client")
-    client = get_client()
+    client = get_client(CREDENTIALS)
     location = client.location
     logger.info(f"bigquery client is good. bigquery location: {location}")
 
