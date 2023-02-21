@@ -42,5 +42,5 @@ with open(CONF_PATH) as open_yaml:
 # ---------------------------------------------
 # default config file path when running locally (not within airflow docker container)
 # get the path from airflow variables OR set it to default local path
-_default_data_dir_path = os.path.join(get_this_dir(), '../../data')
+_default_data_dir_path = os.path.join(get_this_dir(), '../data')
 DATA_DIR = Variable.get('data_dir', default_var=_default_data_dir_path)
