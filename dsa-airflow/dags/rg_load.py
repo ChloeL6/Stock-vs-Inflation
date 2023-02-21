@@ -46,6 +46,7 @@ with DAG(
     print(__file__)
     # pre-check task
 
+    #check number 1 if each of the stocks and bitcoin files are in the data_dir
     check_1 = []
     for file in data_file_names1:
         check = FileSensor(
@@ -58,8 +59,10 @@ with DAG(
         )
         check_1.append(check)
     
+    #provides visibility to user in dag of completion of first check of files in data_dir
     check_1_com = EmptyOperator(task_id='tech_stocks_bitcoin_group_1')
 
+    #check number 2 if each of the stocks and bitcoin files are in the data_dir
     check_2 = []
     for file in data_file_names2:
         check = FileSensor(
@@ -72,53 +75,62 @@ with DAG(
         )
         check_2.append(check)
     
+    #provides visibility to user in dag of completion of first check of files in data_dir
     check_2_com = EmptyOperator(task_id='tech_stocks_group_2')
 
+    #creates output directory within data_dir for parquet files to get loaded into
     outputs_dir_task = PythonOperator(
         task_id='create_outputs_dir',
         python_callable = create_data_outputs,
         doc_md = create_data_outputs.__doc__        # adding function docstring as task doc
     )
 
+    #transformations for stock and bitcoin data
     stock_transf_task = PythonOperator(
         task_id='stock_transformations',
         python_callable = stocks_transform,
         doc_md = stocks_transform.__doc__        # adding function docstring as task doc
     )
 
+    #transformations for M2 money supply data
     m2_transf_task = PythonOperator(
         task_id='m2_transformations',
         python_callable = m2_transform,
         doc_md = m2_transform.__doc__        # adding function docstring as task doc
     )
 
+    #transformations for gas prices data
     gas_transf_task = PythonOperator(
         task_id='gas_transformations',
         python_callable = gas_transform,
         doc_md = gas_transform.__doc__        # adding function docstring as task doc
     )
 
+    #for readability that shows that each transformation creates parquet files
     parquet_task = EmptyOperator(task_id='create_parquet_files')
 
+    #creates dataset in BigQuery for tables to get loaded into
     t0 = PythonOperator(
         task_id='create_dataset',
         python_callable = create_dataset,
         doc_md = create_dataset.__doc__        # adding function docstring as task doc
     )
 
-    
+    #loads stocks and bitcoin table to BigQuery
     stocks_table_task = PythonOperator(
         task_id=f"load_stocks_bitcoin_table",
         python_callable=create_stocks_table,               # call the dsa_utils.table_definitions.create_table
         doc_md=create_stocks_table.__doc__                 # take function docstring
     )
 
+    #loads m2_supply table to BigQuery
     m2_table_task = PythonOperator(
         task_id=f"load_m2_supply_table",
         python_callable=create_m2_table,               # call the dsa_utils.table_definitions.create_table
         doc_md=create_m2_table.__doc__                 # take function docstring
     )
 
+    #checks BigQuery for the existance of the m2_supply table, if exists then proceeds to load gas table
     bq_m2_check = BigQueryTableExistenceSensor(
         task_id="check_table_exists",
         project_id= config['project'],
@@ -126,13 +138,12 @@ with DAG(
         table_id='m2_supply'
     )
     
+    #loads gas prices table to BigQuery
     gas_table_task = PythonOperator(
         task_id=f"load_gas_supply_table",
         python_callable=create_gas_table,               # call the dsa_utils.table_definitions.create_table
         doc_md=create_gas_table.__doc__                 # take function docstring
     )
 
-
-
-
+    #order of the tasks for the DAG
     check_1 >> check_1_com >> check_2 >> check_2_com >> outputs_dir_task >> [stock_transf_task, m2_transf_task, gas_transf_task] >> parquet_task >> t0 >> [stocks_table_task, m2_table_task] >> bq_m2_check >> gas_table_task
