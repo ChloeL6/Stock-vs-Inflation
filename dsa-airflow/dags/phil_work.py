@@ -2,7 +2,7 @@
 ## Overview
 
 This DAG will:
-- Create BigQuery tables for: _airports, airlines, routes, aircraft_
+- Create BigQuery tables for: tornadoes
 - Tables are dropped if they already exist
 - Tables are loaded form CSV file in /data
 
@@ -64,13 +64,13 @@ def check_bigquery_client(CREDENTIALS):
 # -----------------------------------------
 
 with DAG(
-    dag_id='dsa_load_tables',
+    dag_id='tornadoes_etl',
     schedule_interval='@once',
     start_date=datetime.utcnow(),
     catchup=False,
     default_view='graph',
     is_paused_upon_creation=True,
-    tags=['dsa', 'data-loaders'],
+    tags=['team-week-3', 'etl'],
     default_args={
         'depends_on_past': False,
         'email': ['airflow@example.com'],
