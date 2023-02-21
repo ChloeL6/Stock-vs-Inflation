@@ -6,9 +6,9 @@ from airflow.decorators import dag,task
 from airflow.sensors.filesystem import FileSensor
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python import PythonOperator
-from airflow.providers.google.cloud.operators.bigquery import BigQueryGetDatasetOperator
-from cl_work import check_bigquery_client, cpi_transformation, unemp_transformation, load_table, create_table, config
-
+from airflow.providers.google.cloud.operators.bigquery import BigQueryGetDatasetOperator 
+from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor
+from cl_work import check_bigquery_client, cpi_transformation, unemp_transformation, load_table, create_table, config, save_table_from_bq
 
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
@@ -23,7 +23,7 @@ default_args = {
 
 # instantiate a DAG!
 with DAG(
-    'ETL_pipeline_process', 
+    'Test_DAG_with_bq_sensor', 
     description='A DAG to do transformation once files are detected',
     default_args=default_args,
 ) as dag:
@@ -38,6 +38,19 @@ with DAG(
      project_id=PROJECT_NAME,
      dataset_id=DATASET_NAME,
      gcp_conn_id='google_creds'
+  )
+
+  check_stock_table = BigQueryTableExistenceSensor(
+     task_id='check_stock_table',
+     project_id=PROJECT_NAME,
+     dataset_id=DATASET_NAME,
+     table_id='stocks',
+     gcp_conn_id='google_creds'
+  )
+
+  save_table = PythonOperator(
+     task_id='save_table',
+     python_callable=save_table_from_bq
   )
 
   wait_for_files = FileSensor(
@@ -96,3 +109,4 @@ with DAG(
   done = DummyOperator(task_id='done')
 
 check_bq_client >> get_bq_dataset >> wait_for_files >> [cpi_transform, unemp_transform] >> t1 >> create_tasks >> t2 >> load_tasks >> done
+get_bq_dataset >> check_stock_table >> save_table
