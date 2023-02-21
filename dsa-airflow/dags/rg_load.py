@@ -16,10 +16,6 @@ from rg_work import create_dataset, create_stocks_table, data_dir, config, stock
 data_file_names1 = ['AAPL', 'ADBE','AMZN', 'Bitcoin', 'CRM', 'CSCO', 'GOOGL', 'IBM']
 data_file_names2 = ['INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA']
 
-
-table_names = ['stocks']
-
-
 # DAG definition
 # -----------------------------------------
 

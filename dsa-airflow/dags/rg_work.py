@@ -26,7 +26,10 @@ data_dir = data_fs.get_path()
 
 #creates directory within the data directory for transformed parquet files
 def create_data_outputs():
-    os.mkdir(os.path.join(data_dir,'outputs'))
+    try:
+        os.mkdir(os.path.join(data_dir,'outputs'))
+    except:
+        pass
 
 #transformations on stock and bitcoin data
 def stocks_transform():
