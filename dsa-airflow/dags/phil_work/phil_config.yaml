@@ -1,6 +1,0 @@
-# google cloud config
-project: team-week-3
-dataset: tech_stocks_world_events
-
-# data files
-tornadoes: tornadoes.csv
