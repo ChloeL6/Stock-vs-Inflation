@@ -21,12 +21,12 @@ from phil_utils.utils import logger, config
 from phil_utils.table_definitions import create_table, get_client
 from phil_utils.table_loaders import load_table, DATA_FILES
 
-# BigQuery credentials for proejct
-key_path = "/home/philiprobertovich/.creds/team-week-3.json"
+# # BigQuery credentials for proejct
+# key_path = "/home/philiprobertovich/.creds/team-week-3.json"
 
-CREDENTIALS = service_account.Credentials.from_service_account_file(
-    key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"]
-)
+# CREDENTIALS = service_account.Credentials.from_service_account_file(
+#     key_path, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+# )
 
 # Pre-check tasks
 # -----------------------------------------
@@ -44,7 +44,7 @@ def check_data_files():
             raise FileNotFoundError(msg)
 
 
-def check_bigquery_client(CREDENTIALS):
+def check_bigquery_client():
     """
     task to see if we can successfully create a bigquery client
     """
@@ -55,7 +55,7 @@ def check_bigquery_client(CREDENTIALS):
         logger.warn("You most likely have not edited the docker-compose.yaml file correctly. You must restart docker-compose after doing so.")
     # client from dsa_utils.table_definitions module
     logger.info("checking bigquery client")
-    client = get_client(CREDENTIALS)
+    client = get_client()
     location = client.location
     logger.info(f"bigquery client is good. bigquery location: {location}")
 
@@ -99,34 +99,34 @@ with DAG(
     # create an empty operator before branching out to create tables
     t1 = EmptyOperator(task_id='create_tables')
 
-    table_names = ('airports', 'airlines', 'routes', 'aircraft')
+    table_names = ('tornadoes')
 
     # create a separate task for creating each table
-    create_tasks = []
-    for table_name in table_names:
-        task = PythonOperator(
-            task_id=f"create_{table_name}_table",
-            python_callable=create_table,               # call the dsa_utils.table_definitions.create_table
-            op_kwargs={'table_name': table_name},       # arguments to create_table() function
-            doc_md=create_table.__doc__                 # take function docstring
-        )
-        create_tasks.append(task)
+    # create_tasks = []
+    # for table_name in table_names:
+    create_table_task = PythonOperator(
+        task_id=f"create_tornadoes_table",
+        python_callable=create_table,               # call the dsa_utils.table_definitions.create_table
+        op_kwargs={'table_name': 'tornadoes'},       # arguments to create_table() function
+        doc_md=create_table.__doc__                 # take function docstring
+    )
+        # create_tasks.append(task)
 
     # create empty task to branch out to loading files
     t2 = EmptyOperator(task_id='load_files')
 
     # create a separate task for loading each table
-    load_tasks = []
-    for table_name in table_names:
-        task = PythonOperator(
-            task_id=f"load_{table_name}_table",
-            python_callable=load_table,               # call the dsa_utils.table_loaders.load_table
-            op_kwargs={'table_name': table_name},       # arguments to load_table() function
-            doc_md=load_table.__doc__                 # take function docstring
+    # load_tasks = []
+    # for table_name in table_names:
+    load_table_task = PythonOperator(
+        task_id=f"load_tornadoes_table",
+        python_callable=load_table,               # call the dsa_utils.table_loaders.load_table
+        op_kwargs={'table_name': 'tornadoes'},       # arguments to load_table() function
+        doc_md=load_table.__doc__                 # take function docstring
         )
-        load_tasks.append(task)
+        # load_tasks.append(task)
 
     # create empty task to branch back in
     done = EmptyOperator(task_id='done')
 
-    check_1 >> check_2 >> t1 >> create_tasks >> t2 >> load_tasks >> done
+    check_1 >> check_2 >> t1 >> create_table_task >> t2 >> load_table_task >> done
