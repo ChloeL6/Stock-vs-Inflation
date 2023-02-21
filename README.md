@@ -42,7 +42,13 @@
 
 
 
-[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery using `BigQueryGetDatasetOperator`, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off 1) transformations 2) creation of tables and 3) loading of tables to BigQuery. Beside checking the existance of the `tech_stocks_world_events`, `BigQueryTableExistenceSensor` is also used to detect the creation of `stocks` table then save it to local file. Below is the DAG of the above pipeline:
+[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery using `BigQueryGetDatasetOperator`, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off
+
+1. Transformations
+2. Creation of tables
+3. Loading of tables to BigQuery. 
+
+Beside checking the existance of the `tech_stocks_world_events`, `BigQueryTableExistenceSensor` is also used to detect the creation of `stocks` table then save it to local file. Below is the DAG of the above pipeline:
 
 <br>
 
@@ -216,7 +222,13 @@ Overall, the team was able to limit the amount of merge conflicts by working on 
   ./setup.sh
   ```
 
-    The contents of the `setup.sh` include the below to install 1) relevant version of python 2) create virtual env 3) installing Airflow in virtual env and 4) requirements.txt:
+    The contents of the `setup.sh` include the below to install:
+
+    1. Relevant version of python
+    2. Create virtual env
+    3. Installing Airflow in virtual env
+    4. Requirements.txt
+
     ```bash
     #/bin/bash
     # this script will setup the environment and install all necessary components 
@@ -246,7 +258,12 @@ Overall, the team was able to limit the amount of merge conflicts by working on 
   ./airflow_setup.sh
   ```
     
-    The contents of the `airflow_setup.sh` include the below to 1) creating ./logs and ./plugins directories in the dsa-airflow directory 2) download the `docker_compose.yaml` 3) create the .env and 4) initialize airflow
+    The contents of the `airflow_setup.sh` include the below to:
+
+    1. Creating ./logs and ./plugins directories in the dsa-airflow directory 
+    2. Download the `docker_compose.yaml` 
+    3. Create the .env 
+    4. Initialize airflow
     
 ```bash
     #!/bin/bash
@@ -273,7 +290,6 @@ Overall, the team was able to limit the amount of merge conflicts by working on 
 
 
 * You will need to create a cloud connection for the `BigQueryTableExistenceSensor` folder to work.
-  * 
 
 * Once this is all setup, in the Airflow GUI 1) enable your DAG and 2) trigger it to run. From there go to your VS Code and run the below command from inside the data directory:
 
