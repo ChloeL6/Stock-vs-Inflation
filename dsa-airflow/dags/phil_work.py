@@ -16,9 +16,9 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
 
 # local imports
-from dsa_utils.utils import logger, config
-from dsa_utils.table_definitions import create_table, get_client
-from dsa_utils.table_loaders import load_table, DATA_FILES
+from phil_utils.utils import logger, config
+from phil_utils.table_definitions import create_table, get_client
+from phil_utils.table_loaders import load_table, DATA_FILES
 
 
 # Pre-check tasks
