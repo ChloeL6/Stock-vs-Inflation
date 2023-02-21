@@ -11,7 +11,7 @@ from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExisten
 import yaml
 
 # local imports
-from rg_work import create_dataset, create_stocks_table, data_dir, config, stocks_transform, m2_transform, create_m2_table, gas_transform, create_gas_table
+from rg_work import create_dataset, create_stocks_table, data_dir, config, stocks_transform, m2_transform, create_m2_table, gas_transform, create_gas_table, create_data_outputs
 
 data_file_names1 = ['AAPL', 'ADBE','AMZN', 'Bitcoin', 'CRM', 'CSCO', 'GOOGL', 'IBM']
 data_file_names2 = ['INTC','META','MSFT','NFLX','NVDA','ORCL','TSLA']
@@ -74,6 +74,12 @@ with DAG(
     
     check_2_com = EmptyOperator(task_id='tech_stocks_group_2')
 
+    outputs_dir_task = PythonOperator(
+        task_id='create_outputs_dir',
+        python_callable = create_data_outputs,
+        doc_md = create_data_outputs.__doc__        # adding function docstring as task doc
+    )
+
     stock_transf_task = PythonOperator(
         task_id='stock_transformations',
         python_callable = stocks_transform,
@@ -129,4 +135,4 @@ with DAG(
 
 
 
-    check_1 >> check_1_com >> check_2 >> check_2_com >> [stock_transf_task, m2_transf_task, gas_transf_task] >> parquet_task >> t0 >> [stocks_table_task, m2_table_task] >> bq_m2_check >> gas_table_task
+    check_1 >> check_1_com >> check_2 >> check_2_com >> outputs_dir_task >> [stock_transf_task, m2_transf_task, gas_transf_task] >> parquet_task >> t0 >> [stocks_table_task, m2_table_task] >> bq_m2_check >> gas_table_task

@@ -23,6 +23,10 @@ data_dir = data_fs.get_path()
 
 #Initialize spark for ETL to parquet files
 #------------------------------------------------
+def create_data_outputs():
+    os.mkdir(os.path.join(data_dir,'outputs'))
+
+
 def stocks_transform():
     file_names = config['stocks_file_names']
 
