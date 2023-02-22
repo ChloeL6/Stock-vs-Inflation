@@ -6,12 +6,11 @@ from google.cloud.exceptions import NotFound
 from phil_utils.utils import logger, config, DATA_DIR
 
 
-# setup the bigquery client
+# set global variables
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
-# starting a variable name with _ is python convention to say 
-# this is a private module variable and should not be imported outside of this module
-# instead use the `get_client()` method
+
+# setup the bigquery client
 _client: bigquery.Client = None
 
 
