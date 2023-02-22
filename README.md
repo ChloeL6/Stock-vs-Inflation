@@ -289,7 +289,9 @@ Overall, the team was able to limit the amount of merge conflicts by working on 
     <img src="imgs/conn_setup.png" alt="connection setup" width="640"/>
 
 
-* You will need to create a cloud connection for the `BigQueryTableExistenceSensor` folder to work.
+* You will need to create a cloud connection for the `BigQueryTableExistenceSensor` folder to work:
+    * Connection Id: google-cloud-default
+    * Connection Type: Google BigQuery
 
 * Once this is all setup, in the Airflow GUI 1) enable your DAG and 2) trigger it to run. From there go to your VS Code and run the below command from inside the data directory:
 
