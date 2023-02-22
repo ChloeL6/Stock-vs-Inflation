@@ -1,6 +1,6 @@
 # Tech Stocks
 
-#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://github.com/philiprobertovich)
+#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://www.linkedin.com/in/philiprobertovich)
 
 #### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio.
 
@@ -36,28 +36,32 @@
 
 ## Description
 
-[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) and [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021) datasets once they are detected in the data directory. Once the transformations are completed these are complied into three `Parquet` files. Upon completion, the dataset is created in BigQuery and then the stocks and the M2 Supply files are loaded as tables. A `BigQueryTableExistenceSensor` is then used to ensure that the `m2_supply` table is loaded, which then kicks-off the final step of the loading of the `gas` table to BigQuery. He also owned and authored the `README.md`. Below is the DAG of the above pipeline:
+[Ruben](https://www.linkedin.com/in/rubengiosa/) created a DAG using Airflow to that performed profiling, cleaning and transformations on the [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices), [Bitcoin Prices Dataset](https://www.kaggle.com/datasets/yasserh/bitcoin-prices-dataset), [M1, M2 and other Release Data, Monthly -in billions](https://www.federalreserve.gov/datadownload/Download.aspx?rel=H6&series=798e2796917702a5f8423426ba7e6b42&lastobs=&from=&to=&filetype=csv&label=include&layout=seriescolumn&type=package) and [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021). The DAG is triggered once the data files are detected in the data directory using a `FileSensor`. Once the transformations are completed these are complied into three `Parquet` files. Upon completion, the dataset is created in BigQuery, where the the stocks and M2 Supply files are then loaded as tables. A `BigQueryTableExistenceSensor` is then used to ensure that the `m2_supply` table is loaded, which then kicks-off the final step of the loading of the `gas` table to BigQuery. Ruben also owned and authored the `README.md`. Below is the DAG of the above pipeline:
 
-<br>
 <img src="imgs/rg_dag.png" alt="Airflow dag" width="750"/>
 
+<br>
 
-
-[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existance of the `tech_stocks_world_events` dataset in BigQuery using `BigQueryGetDatasetOperator`, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off
+[Chloe](https://www.linkedin.com/in/chloeycl/) worked on profiling, cleaning and transformations for the [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021). She created an ETL pipeline leveraging Airflow that checked BigQuery for the existence of the `tech_stocks_world_events` dataset in BigQuery using `BigQueryGetDatasetOperator`, upon that check it waits for the two files ([US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present) and [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)) to get loaded into the local directory to then kick-off
 
 1. Transformations
 2. Creation of tables
 3. Loading of tables to BigQuery. 
 
-Beside checking the existance of the `tech_stocks_world_events`, `BigQueryTableExistenceSensor` is also used to detect the creation of `stocks` table then save it to local file. Below is the DAG of the above pipeline:
+Beside checking the existence of the `tech_stocks_world_events`, `BigQueryTableExistenceSensor` is also used to detect the creation of `stocks` table then save it to local file. Below is the DAG of the above pipeline:
 
-<br>
 
 <img src="imgs/tw3_DAG_v2.png" alt="Airflow dag" width="750"/>
 
 <br>
 
-### Visualizations:
+[Phil](https://www.linkedin.com/in/philiprobertovich) dealt with handling datasets about natural disasters, specifically tornadoes within the US. Firstly, he profiled and built the pipeline within a Jupyter Notebook. Then, he refactored all that into a series of modules that Airflow could work with. The bulk of the pipeline is housed within the `phil_utils` directory, which essentially is a local package that can be used by the main DAG file to import all the necessary ETL tools and keeps things fairly modular. The `utils.py` is where important objects and variables such as logger, and the pathway to the data directory are constructed in order to be used by the different modules. The configuration file specific to Phil's pipeline is also loaded within this module so it can also be imported into the other files. The `table_definitions.py` file creates the tornadoes table and defines the schema. The `transformation.py` file constructs all the necessary transformations that will be applied to the table. The `table_loaders.py` file loads the table to BigQuery. The `phil_work.py` file is where the DAG for this pipeline is created. It imports all the methods from the `phil_utils` packaged mentioned before so that they can be assigned to tasks. Below is the DAG and it's various tasks: 
+
+<img src='imgs/tornado_dag.jpg' alt='graph of DAG' width='1200'/>
+
+<br>
+
+## Data Visualizations:
 Once the datasets were cleaned and consolidated, the team created data visualizations and analysis (using Looker Studio).
 
 Below is a line graph that was put together by [Ruben](https://www.linkedin.com/in/rubengiosa/) that allows a user to look at the highest tech stock and Bitcoin prices by year (click on image of chart to use dashboard), which leverages the data from the `stocks` table:
@@ -182,19 +186,13 @@ She also creates a stacked combo chart that shows the average of open, close, hi
 
 <br>
 
-Phil dealt with handling datasets about natural disasters, specifically tornadoes within the US. Firstly, he profiled and built the pipeline within a Jupyter Notebook. Then, he refactored all that into a series of modules that Airflow could work with. The bulk of the pipeline is housed within the phil_utils directory, which essentially is a local package that can be used by the main DAG file to import all the necessary ETL tools and keeps things fairly modular. The utils.py is where important objects and variables such as logger, and the pathway to the data directory are constructed in order to be used by the different modules. The configuraiton file specific to Phil's pipeline is also loaded within this module so it can also be imported into the other files. The table_definitions.py file creates the tornadoes table and defines the schema. The transformation.py file constructs all the necessary transformations that will be applied to the table. The table_loaders.py file loads the table to BigQuery. The phil_work.py file is where the DAG for this pipeline is created. It imports all the methods from the phil_utils packaged mentioned before so that they can be assigned to tasks. Below is the DAG and it's various tasks: 
+Below is a line chart created by [Phil](https://www.linkedin.com/in/philiprobertovich) that compares the average magnitude of tornadoes against the total sum of property losses through the years 2016-2021:
 
-<img src='imgs/tornado_dag.jpg' alt='graph of DAG' width='1200'/>
-
-<br>
-
-Below is a line chart created by Phil that compares the average magnitude of tornadoes against the total sum of property losses through the years 2016-2021:
-
-<img src='imgs/tornado_property_v_magnitude.jpg' alt='property vs magnitude line chat' width='750'/>
+[<img src='imgs/tornado_property_v_magnitude.jpg' alt='property vs magnitude line chat' width='750'/>](https://lookerstudio.google.com/reporting/04fcb6ef-1e93-48fc-bc22-0284e3970648)
 
 <br>
 
-Overall, the team was able to limit the amount of merge conflicts by working on independent notebooks and assigning different tasks (e.g. Each focused on constructing specific DAGs and python files, etc.). One challenge we came across was setting up a BigQuery project and granting access to each user, this was a great learning experience for the team as we set up Service Accounts with authorization keys for each user. 
+Overall, the team was able to limit the amount of merge conflicts by working on independent notebooks and assigning different tasks (e.g. Each focused on constructing specific DAGs and python files, etc.). One challenge we came across was setting up a BigQuery project and granting access to each user, this was a great learning experience for the team as we set up Service Accounts with authorization keys for each user.
 
 ## Setup/Installation Requirements
 
