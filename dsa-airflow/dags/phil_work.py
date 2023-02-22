@@ -20,6 +20,7 @@ from airflow.operators.empty import EmptyOperator
 from phil_utils.utils import logger, config
 from phil_utils.table_definitions import create_table, get_client
 from phil_utils.table_loaders import load_table, DATA_FILES
+from phil_utils.transformations import tornadoes_tranformations
 
 # # BigQuery credentials for proejct
 # key_path = "/home/philiprobertovich/.creds/team-week-3.json"
@@ -102,31 +103,36 @@ with DAG(
     table_names = ('tornadoes')
 
     # create a separate task for creating each table
-    # create_tasks = []
-    # for table_name in table_names:
     create_table_task = PythonOperator(
         task_id=f"create_tornadoes_table",
         python_callable=create_table,               # call the dsa_utils.table_definitions.create_table
         op_kwargs={'table_name': 'tornadoes'},       # arguments to create_table() function
         doc_md=create_table.__doc__                 # take function docstring
     )
-        # create_tasks.append(task)
+
+    # create empty task to branch out transformations
+    t2 = EmptyOperator(task_id='transform_files')
+
+    # create transformation task
+    transform_task = PythonOperator(
+        task_id=f'transform_tornadoes_table',
+        python_callable=tornadoes_transformations,
+        doc_md=tornadoes_transformations
+    )
+    
 
     # create empty task to branch out to loading files
-    t2 = EmptyOperator(task_id='load_files')
+    t3 = EmptyOperator(task_id='load_files')
 
     # create a separate task for loading each table
-    # load_tasks = []
-    # for table_name in table_names:
     load_table_task = PythonOperator(
         task_id=f"load_tornadoes_table",
         python_callable=load_table,               # call the dsa_utils.table_loaders.load_table
         op_kwargs={'table_name': 'tornadoes'},       # arguments to load_table() function
         doc_md=load_table.__doc__                 # take function docstring
         )
-        # load_tasks.append(task)
 
     # create empty task to branch back in
     done = EmptyOperator(task_id='done')
 
-    check_1 >> check_2 >> t1 >> create_table_task >> t2 >> load_table_task >> done
+    check_1 >> check_2 >> t1 >> create_table_task >> t2 >> transform_task >> t3 >> load_table_task >> done
