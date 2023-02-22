@@ -20,7 +20,7 @@ from airflow.operators.empty import EmptyOperator
 from phil_utils.utils import logger, config
 from phil_utils.table_definitions import create_table, get_client
 from phil_utils.table_loaders import load_table, DATA_FILES
-from phil_utils.transformations import tornadoes_tranformations
+from phil_utils.transformations import tornadoes_transformations
 
 # # BigQuery credentials for proejct
 # key_path = "/home/philiprobertovich/.creds/team-week-3.json"
@@ -127,7 +127,7 @@ with DAG(
     # create a separate task for loading each table
     load_table_task = PythonOperator(
         task_id=f"load_tornadoes_table",
-        python_callable=load_table,               # call the dsa_utils.table_loaders.load_table
+        python_callable=load_table,               # call the phil_utils.table_loaders.load_table
         op_kwargs={'table_name': 'tornadoes'},       # arguments to load_table() function
         doc_md=load_table.__doc__                 # take function docstring
         )
