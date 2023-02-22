@@ -4,4 +4,4 @@ logs/
 plugins/
 docker-compose.yaml
 .env
-__pycache__
+__pycache__/
