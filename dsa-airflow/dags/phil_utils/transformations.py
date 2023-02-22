@@ -11,7 +11,7 @@ DATASET_NAME = config['dataset']
 
 def tornados_transformations():
   # load tornadoes file
-  tornadoes_df = pd.read_csv(os.path.join(DATA_DIR, config['tornadoes']))
+  tornadoes_df = pd.read_csv(os.path.join(DATA_DIR, config['tornadoes']), header=0)
 
   # Drop columns
   drop_cols = [
@@ -56,3 +56,8 @@ def tornados_transformations():
   tornadoes_df = tornadoes_df.rename(columns=renamed)
 
   logger.info('Renamed columns.')
+
+  # Change data type
+  tornadoes_df['state'] = tornadoes_df['state'].astype('string')
+
+  logger.info('Explicitly set data types.')
