@@ -1,8 +1,8 @@
-# What Impacts Tech Stock Valuations?
+# What kinds of things influence Tech Stock Valuations?
 
 #### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://www.linkedin.com/in/philiprobertovich)
 
-#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio.
+#### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio. Do inflation, M2 money supply, gas prices or even things like tornadoes have any correlation to tech stocks and risk assets like bitcoin? Those where some of the questions the team set out to evaluate below.
 
 <br>
 
