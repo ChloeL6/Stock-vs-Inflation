@@ -9,7 +9,7 @@ from phil_utils.utils import logger, config, DATA_DIR
 PROJECT_NAME = config['project']
 DATASET_NAME = config['dataset']
 
-def tornados_transformations():
+def tornadoes_transformations():
   # load tornadoes file
   tornadoes_file = os.path.join(DATA_DIR, config['tornadoes'])
   tornadoes_df = pd.read_csv(tornadoes_file, 
