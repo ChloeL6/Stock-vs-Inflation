@@ -30,6 +30,7 @@
 4. [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021)
 5. [US Monthly Unemployment Rate 1948](https://www.kaggle.com/datasets/tunguz/us-monthly-unemployment-rate-1948-present)
 6. [U.S. Inflation Data](https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021)
+7. [Tornadoes Dataset](https://www.kaggle.com/datasets/michaelbryantds/tornadoes)
 
 </br>
 
@@ -178,6 +179,18 @@ avg_unemp_per_year as (
 She also creates a stacked combo chart that shows the average of open, close, high and low of Tech companies' and Bitcoin stock in 2022. (click on image of chart to use dashboard):
 
 [<img src="imgs/cl_graph_stocks.png" alt="prices for tech stocks" width="750"/>](https://lookerstudio.google.com/s/r66wu-F_ZH4)
+
+<br>
+
+Phil dealt with handling datasets about natural disasters, specifically tornadoes within the US. Firstly, He profiled and built the pipeline within a Jupyter Notebook. Then, he refactored all that into a series of modules that Airflow could work with. The bulk of the pipeline is housed within the phil_utils directory, which essentially is a local package that can be used by the main DAG file to import all the necessary ETL tools and keeps things fairly modular. The utils.py is where important objects and variables such as logger, and the pathway to the data directory are constructed in order to be used by the different modules. The configuraiton file specific to Phil's pipeline is also loaded within this module so it can also be imported into the other files. The table_definitions.py file creates the tornadoes table and defines the schema. The transformation.py file constructs all the necessary transformations that will be applied to the table. The table_loaders.py file loads the table to BigQuery. The phil_work.py file is where the DAG for this pipeline is created. It imports all the methods from the phil_utils packaged mentioned before so that they can be assigned to tasks. Below is the DAG and it's various tasks: 
+
+<img src='imgs/tornado_dag.jpg' alt='graph of DAG' width='1200'/>
+
+<br>
+
+Below is a line chart created by Phil that compares the average magnitude of tornadoes against the total sum of property losses through the years 2016-2021:
+
+<img src='imgs/tornado_property_v_magnitude.jpg' alt='property vs magnitude line chat' width='750'/>
 
 <br>
 
