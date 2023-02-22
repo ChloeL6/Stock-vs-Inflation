@@ -1,6 +1,6 @@
 # Tech Stocks
 
-#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://github.com/philiprobertovich)
+#### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://www.linkedin.com/in/philiprobertovich)
 
 #### This repo showcases working as a team to build an ETL pipeline and create visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio.
 
