@@ -104,4 +104,4 @@ def tornadoes_transformations():
   logger.info('Explicitly set data types.')
 
   # write to file
-  tornadoes_df.to_csv(tornadoes_file, header=True)
+  tornadoes_df.to_csv(tornadoes_file, header=True, index=False)
