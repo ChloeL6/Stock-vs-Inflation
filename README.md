@@ -1,4 +1,4 @@
-# Tech Stocks
+# What Impacts Tech Stock Valuations?
 
 #### By [Ruben Giosa](https://www.linkedin.com/in/rubengiosa/), [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/), [Philip Kendal](https://www.linkedin.com/in/philiprobertovich)
 
