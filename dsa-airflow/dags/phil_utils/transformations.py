@@ -102,3 +102,6 @@ def tornadoes_transformations():
   tornadoes_df['state'] = tornadoes_df['state'].astype('string')
 
   logger.info('Explicitly set data types.')
+
+  # write to file
+  tornadoes_df.to_csv(tornadoes_file, header=True)
