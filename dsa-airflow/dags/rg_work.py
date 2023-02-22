@@ -8,10 +8,9 @@ import yaml
 import os
 from datetime import datetime
 
-
+#------------------------------------------------
 #SETUP config and FileSensor data dir path
 #------------------------------------------------
-
 _default_config_path = '/opt/airflow/dags/config.yml'
 CONF_PATH = Variable.get('config_file', default_var=_default_config_path)
 config: dict = {}
@@ -21,6 +20,7 @@ with open(CONF_PATH) as open_yaml:
 data_fs = FSHook(conn_id='data_fs')     # get airflow connection for data_fs
 data_dir = data_fs.get_path()  
 
+#------------------------------------------------
 #Initialize spark for ETL to parquet files
 #------------------------------------------------
 
@@ -48,7 +48,7 @@ def stocks_transform():
         idf = pd.read_csv(os.path.join(data_dir,f'{file}.csv'),header=0)
         #rename the columns
         idf = idf.rename(columns=rename_dict)
-        #insert column with the stock name
+        #insert columns with the stock name, month, year
         idf['date'] = pd.to_datetime(idf['date'], format='%Y-%m-%d')
 
         idf.insert(0,'day', idf['date'].dt.day)
@@ -97,6 +97,7 @@ def gas_transform():
 
     gdf.to_parquet(os.path.join(data_dir,config['gas']))
 
+#------------------------------------------------
 #Create project info and table schemas for load into BigQuery
 #------------------------------------------------
 PROJECT_NAME = config['project']
@@ -144,6 +145,7 @@ GAS_TABLE_SCHEMA = [
     bigquery.SchemaField('prem_grade_prices', 'FLOAT', mode='NULLABLE'),
     ]
 
+#------------------------------------------------
 #function to create dataset in BigQuery
 #------------------------------------------------
 def create_dataset():
@@ -154,6 +156,7 @@ def create_dataset():
     else:
         pass
 
+#------------------------------------------------
 #functions to create and load tables in BigQuery
 #------------------------------------------------
 def create_stocks_table():
