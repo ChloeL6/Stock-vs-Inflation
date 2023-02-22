@@ -11,7 +11,48 @@ DATASET_NAME = config['dataset']
 
 def tornados_transformations():
   # load tornadoes file
-  tornadoes_df = pd.read_csv(os.path.join(DATA_DIR, config['tornadoes']), header=0)
+  tornadoes_file = os.path.join(DATA_DIR, config['tornadoes'])
+  tornadoes_df = pd.read_csv(tornadoes_file, 
+    header=0, 
+    parse_dates=[['date', 'time']],
+    on_bad_lines='warn'
+  )
+  
+  logger.info(f"loaded {len(tornadoes_df.index)} rows from {tornadoes_file}")
+
+
+  # check schema: contains all expected columns?
+  expected_columns = [
+      'om',
+      'yr',
+      'mo',
+      'dy',
+      'date_time',
+      'tz',
+      'st',
+      'stf',
+      'stn',
+      'mag',
+      'inj',
+      'fat',
+      'loss',
+      'closs',
+      'slat',
+      'slon',
+      'elat',
+      'elon',
+      'len',
+      'wid',
+      'ns',
+      'sn',
+      'f1',
+      'f2',
+      'f3',
+      'f4',
+      'fc'
+  ]
+  for col in expected_columns:
+    assert col in list(tornadoes_df.columns), f"Data file missing required column: {col}"
 
   # Drop columns
   drop_cols = [
