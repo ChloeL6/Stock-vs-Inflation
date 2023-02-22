@@ -31,4 +31,28 @@ def tornados_transformations():
 
   logger.info('Dropped columns.')
 
-  
+  # Rename columns
+  renamed = {
+    'date_time':'date',
+    'om':'tornado_number',
+    'yr':'year',
+    'mo':'month',
+    'dy':'day',
+    'tz':'timezone',
+    'st':'state',
+    'mag':'magnitude',
+    'inj':'injuries',
+    'fat':'fatalities',
+    'loss':'property_loss',
+    'closs':'crop_loss',
+    'slat':'starting_lat',
+    'slon':'starting_lon',
+    'elat':'end_lat',
+    'elon':'end_lon',
+    'len':'length',
+    'wid':'width'
+  }
+
+  tornadoes_df = tornadoes_df.rename(columns=renamed)
+
+  logger.info('Renamed columns.')
