@@ -194,7 +194,29 @@ She also creates a stacked combo chart that shows the average of open, close, hi
 
 Below is a line chart created by [Phil](https://www.linkedin.com/in/philiprobertovich) that compares the average magnitude of tornadoes against the total sum of property losses through the years 2016-2021:
 
-[<img src='imgs/tornado_property_v_magnitude.jpg' alt='property vs magnitude line chat' width='750'/>](https://lookerstudio.google.com/reporting/04fcb6ef-1e93-48fc-bc22-0284e3970648)
+[<img src='imgs/tornado_property_v_magnitude.jpg' alt='property vs magnitude line chart' width='750'/>](https://lookerstudio.google.com/reporting/04fcb6ef-1e93-48fc-bc22-0284e3970648)
+
+<br>
+
+He also created another line chat that compares the average magnitude of tornadoes against the total sum of crop losses through the years 2016-2021
+
+[<img src='imgs/tornado_crop_v_magnitude.jpg' alt='crop vs magnitude line chart' width='750'>](https://lookerstudio.google.com/reporting/04fcb6ef-1e93-48fc-bc22-0284e3970648)
+
+<br>
+
+The two following charts were also created by Phil, and they showcase pie charts that breakdown the percentage of total property and crop losses by each state throughout the years recorded into the dataset which are 1950-2021. 
+
+<br>
+
+Below is the pie chart representing the total property loss by state:
+
+[<img src='imgs/tornado_property_loss_per_state.jpg' alt='total property loss per state' width='600'>](https://lookerstudio.google.com/reporting/04fcb6ef-1e93-48fc-bc22-0284e3970648)
+
+<br>
+
+Below is the pie chart representing the total crop loss by state:
+
+[<img src='imgs/tornado_crop_loss_per_state.jpg' alt='crop loss per state' width='600'>](https://lookerstudio.google.com/reporting/04fcb6ef-1e93-48fc-bc22-0284e3970648)
 
 <br>
 
