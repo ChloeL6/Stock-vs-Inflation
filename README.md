@@ -1,13 +1,11 @@
 # Stock prices, CPI and inflation
 
 #### By [Chloe (Yen Chi) Le](https://www.linkedin.com/in/chloeycl/) 
-<br>
 
 #### We found this [Big Tech Stock Prices](https://www.kaggle.com/datasets/evangower/big-tech-stock-prices) and wonder what events can influence the stock prices. We want to find out the answer by combining it with other datasets, building an ETL pipeline, creating visualizations using Python, SQL, Airflow, Pandas, BigQuery and Looker Studio. 
 
 #### This repo is a copy of a team project ([Stock-Prices](https://github.com/ChloeL6/Stock-prices.git)) and only shows my works and updates.
 
-<br>
 
 ## Technologies Used
 
@@ -20,7 +18,6 @@
 * Pandas
 * `requirements.txt`
   
-</br>
 
 ## Datasets Used
 
@@ -32,7 +29,7 @@
 6.  [U.S. Gasoline and Diesel Retail Prices 1995-2021](https://www.kaggle.com/datasets/mruanova/us-gasoline-and-diesel-retail-prices-19952021)
 7.  [Tornadoes Dataset](https://www.kaggle.com/datasets/michaelbryantds/tornadoes)
 
-</br>
+<br>
 
 ## Description
 
@@ -44,15 +41,14 @@ My portion of the project is to work on profiling, cleaning and transformations 
 <img src="imgs/Stock_drawio.drawio.png" alt="Overview of an ETL pipeline" width="750">
 <br> 
 
-* The detailed workflow that implemented on Airflow is:
+* The detailed pipeline that implemented on Airflow is:
   * Check the existence of the dataset in `BigQuery` using `BigQueryGetDatasetOperator`
   * If dataset is created and the files are detected in data folder using `FileSensor`, transformation tasks will be kicked off
   * Once transformation is done, files will be load to `BigQuery`
   * `BigQueryTableExistenceSensor` is also used to detect if `stocks` table is loaded by my teammate, if it is then save to the local file
 * Below is the DAG for the pipeline:
-<img src="imgs/tw3_DAG_v2.png" alt="Airflow dag" width="750"/>
+<img src="imgs/tw3_DAG_v2.png" alt="Airflow dag" width="900"/>
 
-<br>
 
 ## Data Visualizations:
 * Once the datasets were cleaned and consolidated, the team created data visualizations and analysis (using Looker Studio).
